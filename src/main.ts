@@ -4,13 +4,13 @@ import { World } from './scenes/World'
 
 new Game({
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: window.innerWidth,
+  height: window.innerHeight,
+  pixelArt: true,
   render: { pixelArt: true },
   physics: {
     default: 'arcade',
     arcade: {
-      debug: true,
       gravity: { y: 0 },
     },
   },

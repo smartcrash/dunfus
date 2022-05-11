@@ -3,7 +3,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'hero')
 
     this.createAnims()
-    this.setScale(3)
     this.play('idle-down')
 
     scene.add.existing(this)
@@ -35,7 +34,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   private addCursorKeysListener() {
     const cursors = this.scene.input.keyboard.createCursorKeys()
-    const speed = 200
+    const speed = 100
 
     const setVelocity = this.setVelocity.bind(this)
     const setVelocityX = this.setVelocityX.bind(this)
