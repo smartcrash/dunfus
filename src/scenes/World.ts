@@ -4,7 +4,9 @@ import { Player } from '../Player'
 const DEBUG = false
 
 export class World extends Scene {
-  constructor() { super('') }
+  constructor() {
+    super('')
+  }
 
   preload(): void {
     this.load.spritesheet('hero', 'assets/hero.png', { frameWidth: 16, frameHeight: 16 })
@@ -24,15 +26,14 @@ export class World extends Scene {
     const wallsLayer = map.createLayer('walls', tilemap).setCollisionByProperty({ collides: true })
     const groundLayer = map.createLayer('ground', tilemap)
 
-
     if (DEBUG) {
-      const debugGraphics = this.add.graphics().setAlpha(0.75);
+      const debugGraphics = this.add.graphics().setAlpha(0.75)
 
       wallsLayer.renderDebug(debugGraphics, {
         tileColor: null, // Color of non-colliding tiles
         collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-        faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
-      });
+        faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
+      })
     }
 
     // Player

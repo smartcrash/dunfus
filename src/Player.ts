@@ -15,21 +15,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const createAnim = this.scene.anims.create.bind(this.scene.anims)
     const generateFrameNumbers = this.scene.anims.generateFrameNumbers.bind(this.scene.anims)
 
-      ;[
-        { key: 'idle-down', frames: { frames: [0] }, },
-        { key: 'idle-up', frames: { frames: [1] }, },
-        { key: 'idle-left', frames: { frames: [2] }, },
-        { key: 'walk-down', frames: { start: 3, end: 6 }, },
-        { key: 'walk-left', frames: { start: 7, end: 10 }, },
-        { key: 'walk-up', frames: { start: 11, end: 14 }, },
-      ].forEach(({ key, frames }) =>
-        createAnim({
-          key,
-          frames: generateFrameNumbers('hero', frames),
-          frameRate: 8,
-          repeat: -1,
-        })
-      )
+    ;[
+      { key: 'idle-down', frames: { frames: [0] } },
+      { key: 'idle-up', frames: { frames: [1] } },
+      { key: 'idle-left', frames: { frames: [2] } },
+      { key: 'walk-down', frames: { start: 3, end: 6 } },
+      { key: 'walk-left', frames: { start: 7, end: 10 } },
+      { key: 'walk-up', frames: { start: 11, end: 14 } },
+    ].forEach(({ key, frames }) =>
+      createAnim({
+        key,
+        frames: generateFrameNumbers('hero', frames),
+        frameRate: 8,
+        repeat: -1,
+      })
+    )
   }
 
   private addCursorKeysListener() {
