@@ -36,38 +36,33 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const cursors = this.scene.input.keyboard.createCursorKeys()
     const speed = 100
 
-    const setVelocity = this.setVelocity.bind(this)
-    const setVelocityX = this.setVelocityX.bind(this)
-    const setVelocityY = this.setVelocityY.bind(this)
+    // Update body velocity based on pressed cursors
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
+      this.setVelocity(0, 0)
+
+      if (cursors.left.isDown) this.setVelocityX(-speed)
+      else if (cursors.right.isDown) this.setVelocityX(speed)
+      else if (cursors.up.isDown) this.setVelocityY(-speed)
+      else if (cursors.down.isDown) this.setVelocityY(speed)
+    })
+
+    // Play animation based on body velocity
+
     const playAnim = (key: string) => this.play(key, true)
-    const setFlipX = this.setFlipX.bind(this)
     const velocity = this.body.velocity
+    let direccion: 'up' | 'down' | 'left' = 'down'
 
-    this.scene.events.on(Phaser.Scenes.Events.UPDATE, function () {
-      const prevVelocity = velocity.clone()
-      setVelocity(0)
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
+      if (cursors.left.isDown || cursors.right.isDown) direccion = 'left'
+      else if (cursors.up.isDown) direccion = 'up'
+      else if (cursors.down.isDown) direccion = 'down'
 
-      // Velocity
+      if (velocity.length()) this.setFlipX(velocity.x > 0)
 
-      if (cursors.left.isDown) setVelocityX(-speed)
-      else if (cursors.right.isDown) setVelocityX(speed)
-      else if (cursors.up.isDown) setVelocityY(-speed)
-      else if (cursors.down.isDown) setVelocityY(speed)
-
-
-      // Animation
-
-      if (cursors.left.isDown || cursors.right.isDown) playAnim('walk-left')
-      else if (cursors.up.isDown) playAnim('walk-up')
-      else if (cursors.down.isDown) playAnim('walk-down')
-
-      if (velocity.length()) setFlipX(cursors.right.isDown)
-
-      if (!velocity.length() && prevVelocity.length()) {
-        if (prevVelocity.x !== 0) playAnim('idle-left')
-        else if (prevVelocity.y > 0) playAnim('idle-down')
-        else playAnim('idle-up')
-      }
+      if (velocity.x !== 0) playAnim('walk-left')
+      else if (velocity.y < 0) playAnim('walk-up')
+      else if (velocity.y > 0) playAnim('walk-down')
+      else playAnim(`idle-${direccion}`)
     })
   }
 }
