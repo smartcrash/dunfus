@@ -11,5 +11,6 @@ export class World extends Scene {
   create(): void {
     const player = new Player(this, 100, 100)
 
+    this.cameras.main.startFollow(player)
   }
 }
