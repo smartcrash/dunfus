@@ -15,21 +15,22 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const createAnim = this.scene.anims.create.bind(this.scene.anims)
     const generateFrameNumbers = this.scene.anims.generateFrameNumbers.bind(this.scene.anims)
 
-    ;[
-      { key: 'idle-down', frames: { frames: [0] } },
-      { key: 'idle-up', frames: { frames: [1] } },
-      { key: 'idle-left', frames: { frames: [2] } },
-      { key: 'walk-down', frames: { start: 3, end: 6 } },
-      { key: 'walk-left', frames: { start: 7, end: 10 } },
-      { key: 'walk-up', frames: { start: 11, end: 14 } },
-    ].forEach(({ key, frames }) =>
-      createAnim({
-        key,
-        frames: generateFrameNumbers('hero', frames),
-        frameRate: 8,
-        repeat: -1,
-      })
-    )
+      ;[
+        { key: 'idle-down', frames: { frames: [0] } },
+        { key: 'idle-up', frames: { frames: [1] } },
+        { key: 'idle-left', frames: { frames: [2] } },
+        { key: 'walk-down', frames: { start: 3, end: 6 } },
+        { key: 'walk-left', frames: { start: 7, end: 10 } },
+        { key: 'walk-right', frames: { start: 7, end: 10 } },
+        { key: 'walk-up', frames: { start: 11, end: 14 } },
+      ].forEach(({ key, frames }) =>
+        createAnim({
+          key,
+          frames: generateFrameNumbers('hero', frames),
+          frameRate: 8,
+          repeat: -1,
+        })
+      )
   }
 
   private addCursorKeysListener() {
@@ -50,10 +51,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     const playAnim = (key: string) => this.play(key, true)
     const velocity = this.body.velocity
-    let direccion: 'up' | 'down' | 'left' = 'down'
+    let direccion: 'up' | 'down' | 'right' | 'left' = 'down'
 
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      if (cursors.left.isDown || cursors.right.isDown) direccion = 'left'
+      if (cursors.left.isDown) direccion = 'left'
+      else if (cursors.right.isDown) direccion = 'right'
       else if (cursors.up.isDown) direccion = 'up'
       else if (cursors.down.isDown) direccion = 'down'
 
