@@ -3,7 +3,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, 'hero')
 
     this.createAnims()
-    this.play('idle-down')
+    this.play('idle')
 
     scene.add.existing(this)
     scene.physics.add.existing(this)
@@ -16,13 +16,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const generateFrameNumbers = this.scene.anims.generateFrameNumbers.bind(this.scene.anims)
 
       ;[
-        { key: 'idle-down', frames: { frames: [0] } },
-        { key: 'idle-up', frames: { frames: [1] } },
-        { key: 'idle-left', frames: { frames: [2] } },
-        { key: 'walk-down', frames: { start: 3, end: 6 } },
-        { key: 'walk-left', frames: { start: 7, end: 10 } },
-        { key: 'walk-right', frames: { start: 7, end: 10 } },
-        { key: 'walk-up', frames: { start: 11, end: 14 } },
+        { key: 'idle', frames: { start: 0, end: 3 } },
+        { key: 'walk', frames: { start: 8, end: 13 } },
+        { key: 'attack', frames: { start: 16, end: 19 } },
+        { key: 'hit', frames: { start: 24, end: 26 } },
+        { key: 'die', frames: { start: 32, end: 39 } },
       ].forEach(({ key, frames }) =>
         createAnim({
           key,
@@ -59,12 +57,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       else if (cursors.up.isDown) direccion = 'up'
       else if (cursors.down.isDown) direccion = 'down'
 
-      if (velocity.length()) this.setFlipX(velocity.x > 0)
+      this.setFlipX(direccion === 'left')
 
-      if (velocity.x !== 0) playAnim('walk-left')
-      else if (velocity.y < 0) playAnim('walk-up')
-      else if (velocity.y > 0) playAnim('walk-down')
-      else playAnim(`idle-${direccion}`)
+      if (velocity.length()) playAnim('walk')
+      else playAnim('idle')
     })
   }
 }
