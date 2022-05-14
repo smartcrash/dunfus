@@ -23,7 +23,7 @@ export class World extends Scene {
 
     // Camera
     this.cameras.main.zoom = 5
-    this.cameras.main.startFollow(player) //
+    this.cameras.main.startFollow(player)
 
     // Colliders
     this.physics.add.collider(player, wallsLayer)
