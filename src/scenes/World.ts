@@ -1,5 +1,7 @@
-import { Scene } from 'phaser'
-import { Player } from '../Player'
+import { Scene } from 'phaser';
+import { PathFindingGrid } from '../PathFindingGrid';
+import { Player } from '../Player';
+
 
 export class World extends Scene {
   constructor() { super('') }
@@ -15,17 +17,19 @@ export class World extends Scene {
     const tilemap = this.make.tilemap({ key: 'map' })
     const tileset = tilemap.addTilesetImage('tileset', 'tileset')
 
-    const wallsLayer = tilemap.createLayer('walls', tileset).setCollisionByProperty({ collides: true })
-    const groundLayer = tilemap.createLayer('ground', tileset)
+    tilemap.createLayer(0, tileset).setCollisionByProperty({ collides: true })
+
+    const grid = new PathFindingGrid(tilemap)
 
     // Player
-    const player = new Player(this, 40, 40)
+    const player = new Player(this, 40, 40, grid)
+    const camera = this.cameras.main
 
     // Camera
-    this.cameras.main.zoom = 5
-    this.cameras.main.startFollow(player)
+    camera.zoom = 5
+    camera.startFollow(player)
 
     // Colliders
-    this.physics.add.collider(player, wallsLayer)
+    this.physics.add.collider(player, tilemap.getLayer(0).tilemapLayer)
   }
 }

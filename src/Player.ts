@@ -1,5 +1,9 @@
+import { type PathFindingGrid } from "./PathFindingGrid"
+
 export class Player extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene: Phaser.Scene, x: number, y: number) {
+  private speed = 80
+
+  constructor(scene: Phaser.Scene, x: number, y: number, private grid: PathFindingGrid) {
     super(scene, x, y, 'hero')
 
     this.createAnims()
@@ -9,6 +13,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this)
 
     this.addCursorKeysListener()
+    this.addClickListener()
   }
 
   private createAnims() {
@@ -33,7 +38,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   private addCursorKeysListener() {
     const cursors = this.scene.input.keyboard.createCursorKeys()
-    const speed = 100
+    const speed = this.speed
 
     // Update body velocity based on pressed cursors
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
@@ -62,5 +67,35 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       if (velocity.length()) playAnim('walk')
       else playAnim('idle')
     })
+  }
+
+  private addClickListener() {
+    this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
+      const { worldX, worldY } = pointer
+      const { x: endX, y: endY } = this.grid.worldToTileXY(worldX, worldY)
+      const { x: startX, y: startY } = this.grid.worldToTileXY(this.x, this.y)
+
+      const handlePath = (path: { x: number, y: number }[] | null): void => {
+        if (path === null) return
+
+        const tweens: Phaser.Types.Tweens.TweenBuilderConfig[] = [];
+
+        path.forEach(({ x, y }) => {
+          tweens.push({
+            targets: this,
+            props: {
+              x: { value: this.grid.tileToWorldX(x), duration: 200 },
+              y: { value: this.grid.tileToWorldY(y), duration: 200 }
+            }
+          });
+
+        })
+
+        this.scene.tweens.timeline({ tweens });
+      }
+
+      this.grid.findPath(startX, startY, endX, endY, handlePath)
+    })
+
   }
 }
