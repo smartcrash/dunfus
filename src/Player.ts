@@ -2,6 +2,7 @@ import { type PathFindingGrid } from "./PathFindingGrid"
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   private speed = 80
+  private isFolowingPath = true
 
   constructor(scene: Phaser.Scene, x: number, y: number, private grid: PathFindingGrid) {
     super(scene, x, y, 'hero')
@@ -11,6 +12,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     scene.add.existing(this)
     scene.physics.add.existing(this)
+
+    this.setFriction(0);
+    this.setBounce(0);
 
     this.addCursorKeysListener()
     this.addClickListener()
@@ -42,6 +46,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Update body velocity based on pressed cursors
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
+      if (this.isFolowingPath) return
+
       this.setVelocity(0, 0)
 
       if (cursors.left.isDown) this.setVelocityX(-speed)
@@ -57,10 +63,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     let direccion: 'up' | 'down' | 'right' | 'left' = 'down'
 
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      if (cursors.left.isDown) direccion = 'left'
-      else if (cursors.right.isDown) direccion = 'right'
-      else if (cursors.up.isDown) direccion = 'up'
-      else if (cursors.down.isDown) direccion = 'down'
+      if (velocity.x < 0) direccion = 'left'
+      else if (velocity.x > 0) direccion = 'right'
+      else if (velocity.y > 0) direccion = 'down'
+      else if (velocity.y < 0) direccion = 'up'
 
       this.setFlipX(direccion === 'left')
 
@@ -75,26 +81,27 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       const { x: endX, y: endY } = this.grid.worldToTileXY(worldX, worldY)
       const { x: startX, y: startY } = this.grid.worldToTileXY(this.x, this.y)
 
-      const handlePath = (path: { x: number, y: number }[] | null): void => {
+      this.grid.findPath(startX, startY, endX, endY, (path) => {
         if (path === null) return
 
-        const tweens: Phaser.Types.Tweens.TweenBuilderConfig[] = [];
+        const interval = 300
 
-        path.forEach(({ x, y }) => {
-          tweens.push({
-            targets: this,
-            props: {
-              x: { value: this.grid.tileToWorldX(x), duration: 200 },
-              y: { value: this.grid.tileToWorldY(y), duration: 200 }
-            }
-          });
+        this.isFolowingPath = true
 
+        path.slice(1).forEach(({ x, y }, index, { length }) => {
+          setTimeout(() => {
+            const worldX = this.grid.tileToWorldX(x)
+            const worldY = this.grid.tileToWorldY(y)
+
+            this.scene.physics.moveTo(this, worldX, worldY, undefined, interval)
+
+            if (index === length - 1) setTimeout(() => {
+              this.body.stop()
+              this.isFolowingPath = false
+            }, interval)
+          }, index * interval)
         })
-
-        this.scene.tweens.timeline({ tweens });
-      }
-
-      this.grid.findPath(startX, startY, endX, endY, handlePath)
+      })
     })
 
   }

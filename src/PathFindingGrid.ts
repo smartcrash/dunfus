@@ -44,13 +44,13 @@ export class PathFindingGrid {
    * Converts from tile X coordinates (tile units) to world X coordinates (pixels)
    */
   tileToWorldX(tileX: number): number {
-    return this.tilemap.tileToWorldX(tileX)
+    return this.tilemap.tileToWorldX(tileX) + this.tilemap.tileWidth / 2
   }
 
   /**
    * Converts from tile Y coordinates (tile units) to world Y coordinates (pixels)
    */
   tileToWorldY(tileY: number): number {
-    return this.tilemap.tileToWorldY(tileY)
+    return this.tilemap.tileToWorldY(tileY) + this.tilemap.tileHeight / 2
   }
 }
