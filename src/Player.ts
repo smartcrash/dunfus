@@ -87,26 +87,23 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       const { x: endX, y: endY } = this.grid.worldToTileXY(worldX, worldY)
       const { x: startX, y: startY } = this.grid.worldToTileXY(this.x, this.y)
 
-      this.grid.findPath(startX, startY, endX, endY, (path) => {
-        if (path === null) return
+      const path = this.grid.findPath(startX, startY, endX, endY)
+      const interval = 300
 
-        const interval = 300
+      this.isFolowingPath = true
 
-        this.isFolowingPath = true
+      path.slice(1).forEach(([x, y], index, { length }) => {
+        setTimeout(() => {
+          const worldX = this.grid.tileToWorldX(x) - this.body.offset.x
+          const worldY = this.grid.tileToWorldY(y) - this.body.offset.y
 
-        path.slice(1).forEach(({ x, y }, index, { length }) => {
-          setTimeout(() => {
-            const worldX = this.grid.tileToWorldX(x) - this.body.offset.x
-            const worldY = this.grid.tileToWorldY(y) - this.body.offset.y
+          this.scene.physics.moveTo(this, worldX, worldY, undefined, interval)
 
-            this.scene.physics.moveTo(this, worldX, worldY, undefined, interval)
-
-            if (index === length - 1) setTimeout(() => {
-              this.body.stop()
-              this.isFolowingPath = false
-            }, interval)
-          }, index * interval)
-        })
+          if (index === length - 1) setTimeout(() => {
+            this.body.stop()
+            this.isFolowingPath = false
+          }, interval)
+        }, index * interval)
       })
     })
 

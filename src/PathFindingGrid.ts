@@ -1,35 +1,27 @@
-import Easystar from 'easystarjs';
-
-const array2d = <T>(rows: number, cols: number, defaultValue: T): T[][] => Array.from(Array(rows), () => new Array(cols).fill(defaultValue));
+import { AStarFinder, Grid } from 'pathfinding';
 
 export class PathFindingGrid {
-  private easystar: Easystar.js
+  private grid: Grid
+  private finder: AStarFinder
   private tilemap: Phaser.Tilemaps.Tilemap
 
   constructor(tilemap: Phaser.Tilemaps.Tilemap) {
-    this.easystar = new Easystar.js()
     this.tilemap = tilemap
+    this.grid = new Grid(tilemap.width, tilemap.height)
+    this.finder = new AStarFinder({
+      allowDiagonal: false,
+      dontCrossCorners: true
+    } as any)
 
-    const grid: number[][] = array2d(tilemap.height, tilemap.width, -1)
-    const acceptableTiles: number[] = []
 
-    tilemap.forEachTile(({ properties, index, x, y }) => {
-      grid[x][y] = index
-      if (!properties.collides && !acceptableTiles.includes(index)) acceptableTiles.push(index)
-    })
-
-    this.easystar.setGrid(grid)
-    this.easystar.setAcceptableTiles(acceptableTiles)
-
-    this.easystar.findPath
+    tilemap.forEachTile(({ properties, x, y }) => this.grid.setWalkableAt(x, y, !properties.collides))
   }
 
   /**
    * Find a path.
    */
-  findPath(startX: number, startY: number, endX: number, endY: number, callback: (path: { x: number, y: number }[] | null) => void): void {
-    this.easystar.findPath(startX, startY, endX, endY, callback)
-    this.easystar.calculate()
+  findPath(startX: number, startY: number, endX: number, endY: number): number[][] {
+    return this.finder.findPath(startX, startY, endX, endY, this.grid.clone())
   }
 
   /**
