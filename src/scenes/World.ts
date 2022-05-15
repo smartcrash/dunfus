@@ -22,10 +22,12 @@ export class World extends Scene {
     const grid = new PathFindingGrid(tilemap)
 
     // Player
-    const player = new Player(this, 40, 40, grid)
-    const camera = this.cameras.main
+    const { x: iniX, y: iniY } = grid.tileToWorldXY(2, 2)
+    const player = new Player(this, iniX, iniY, grid)
 
     // Camera
+    const camera = this.cameras.main
+
     camera.zoom = 5
     camera.startFollow(player)
 

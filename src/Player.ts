@@ -2,7 +2,7 @@ import { type PathFindingGrid } from "./PathFindingGrid"
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   private speed = 80
-  private isFolowingPath = true
+  private isFolowingPath = false
 
   constructor(scene: Phaser.Scene, x: number, y: number, private grid: PathFindingGrid) {
     super(scene, x, y, 'hero')
@@ -15,6 +15,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.setFriction(0);
     this.setBounce(0);
+
+    this.body.setSize(18, 12)
+    this.body.setOffset(0, 8)
+
+    this.x -= this.body.offset.x
+    this.y -= this.body.offset.y
 
     this.addCursorKeysListener()
     this.addClickListener()
@@ -90,8 +96,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
         path.slice(1).forEach(({ x, y }, index, { length }) => {
           setTimeout(() => {
-            const worldX = this.grid.tileToWorldX(x)
-            const worldY = this.grid.tileToWorldY(y)
+            const worldX = this.grid.tileToWorldX(x) - this.body.offset.x
+            const worldY = this.grid.tileToWorldY(y) - this.body.offset.y
 
             this.scene.physics.moveTo(this, worldX, worldY, undefined, interval)
 

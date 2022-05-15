@@ -53,4 +53,14 @@ export class PathFindingGrid {
   tileToWorldY(tileY: number): number {
     return this.tilemap.tileToWorldY(tileY) + this.tilemap.tileHeight / 2
   }
+
+  /**
+   * Converts from tile XY coordinates (tile units) to world XY coordinates (pixels)
+   */
+  tileToWorldXY(tileX: number, tileY: number): Phaser.Math.Vector2 {
+    return new Phaser.Math.Vector2(
+      this.tileToWorldX(tileX),
+      this.tileToWorldY(tileY)
+    )
+  }
 }
