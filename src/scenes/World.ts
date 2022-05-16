@@ -1,6 +1,7 @@
 import { Scene } from 'phaser';
 import { PathFindingGrid } from '../PathFindingGrid';
 import { Player } from '../Player';
+import { Slime } from '../Slime';
 
 
 export class World extends Scene {
@@ -8,6 +9,7 @@ export class World extends Scene {
 
   preload(): void {
     this.load.spritesheet('hero', 'assets/hero.png', { frameWidth: 18, frameHeight: 18, })
+    this.load.spritesheet('slime', 'assets/slime.png', { frameWidth: 18, frameHeight: 18, })
     this.load.image('tileset', 'assets/tileset.png')
     this.load.tilemapTiledJSON('map', 'assets/map.json')
   }
@@ -33,5 +35,9 @@ export class World extends Scene {
 
     // Colliders
     this.physics.add.collider(player, tilemap.getLayer(0).tilemapLayer)
+
+    // Enemy
+
+    const slime = new Slime(this, grid.tileToWorldX(5), grid.tileToWorldY(5))
   }
 }
