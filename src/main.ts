@@ -1,6 +1,8 @@
 import './style.css'
 import Phaser, { Game } from 'phaser'
-import { World } from './scenes/World'
+import { Room } from './scenes/World'
+import { Preload } from './scenes/Preload'
+import { UI } from './scenes/UI'
 
 new Game({
   type: Phaser.AUTO,
@@ -14,5 +16,5 @@ new Game({
       gravity: { y: 0 },
     },
   },
-  scene: [World],
+  scene: [Preload, Room, UI],
 })
