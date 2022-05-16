@@ -1,50 +1,29 @@
 import { type PathFindingGrid } from "./PathFindingGrid"
+import { Unit } from "./Unit"
 
 
-export class Player extends Phaser.Physics.Arcade.Sprite {
+export class Player extends Unit {
   private speed = 80
-  private isFolowingPath = false
+  private cursorsEnabled = true
 
   constructor(scene: Phaser.Scene, x: number, y: number, private grid: PathFindingGrid) {
-    super(scene, x, y, 'hero')
-
-    this.createAnims()
-    this.play('idle')
-
-    scene.add.existing(this)
-    scene.physics.add.existing(this)
-
-    this.setFriction(0);
-    this.setBounce(0);
-
-    this.body.setSize(18, 12)
-    this.body.setOffset(0, 8)
-
-    this.x -= this.body.offset.x
-    this.y -= this.body.offset.y
+    super({
+      scene,
+      x,
+      y,
+      texture: 'hero',
+      initalAnim: 'hero.idle',
+      anims: [
+        { key: 'hero.idle', config: { start: 0, end: 3 } },
+        { key: 'hero.walk', config: { start: 8, end: 13 } },
+        { key: 'hero.attack', config: { start: 16, end: 19 } },
+        { key: 'hero.hit', config: { start: 24, end: 26 } },
+        { key: 'hero.die', config: { start: 32, end: 39 } },
+      ],
+    })
 
     this.addCursorKeysListener()
     this.addClickListener()
-  }
-
-  private createAnims() {
-    const createAnim = this.scene.anims.create.bind(this.scene.anims)
-    const generateFrameNumbers = this.scene.anims.generateFrameNumbers.bind(this.scene.anims)
-
-      ;[
-        { key: 'idle', frames: { start: 0, end: 3 } },
-        { key: 'walk', frames: { start: 8, end: 13 } },
-        { key: 'attack', frames: { start: 16, end: 19 } },
-        { key: 'hit', frames: { start: 24, end: 26 } },
-        { key: 'die', frames: { start: 32, end: 39 } },
-      ].forEach(({ key, frames }) =>
-        createAnim({
-          key,
-          frames: generateFrameNumbers('hero', frames),
-          frameRate: 8,
-          repeat: -1,
-        })
-      )
   }
 
   private addCursorKeysListener() {
@@ -53,7 +32,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Update body velocity based on pressed cursors
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      if (this.isFolowingPath) return
+      if (!this.cursorsEnabled) return
 
       this.setVelocity(0, 0)
 
@@ -64,6 +43,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     })
 
     // Play animation based on body velocity
+    // TODO: Move to Unit class
 
     const playAnim = (key: string) => this.play(key, true)
     const velocity = this.body.velocity
@@ -77,8 +57,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
       this.setFlipX(direccion === 'left')
 
-      if (velocity.length()) playAnim('walk')
-      else playAnim('idle')
+      if (velocity.length()) playAnim('hero.walk')
+      else playAnim('hero.idle')
     })
   }
 
@@ -91,7 +71,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       const path = this.grid.findPath(startX, startY, endX, endY)
       const interval = 300
 
-      this.isFolowingPath = true
+      this.cursorsEnabled = false
 
       path.slice(1).forEach(([x, y], index, { length }) => {
         setTimeout(() => {
@@ -102,7 +82,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
           if (index === length - 1) setTimeout(() => {
             this.body.stop()
-            this.isFolowingPath = false
+            this.cursorsEnabled = true
           }, interval)
         }, index * interval)
       })
