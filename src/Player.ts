@@ -71,6 +71,8 @@ export class Player extends Unit {
       const path = this.grid.findPath(startX, startY, endX, endY)
       const interval = 300
 
+      if (path.length <= 1) return
+
       this.cursorsEnabled = false
 
       path.slice(1).forEach(([x, y], index, { length }) => {
