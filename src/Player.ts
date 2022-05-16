@@ -1,5 +1,6 @@
 import { type PathFindingGrid } from "./PathFindingGrid"
 
+
 export class Player extends Phaser.Physics.Arcade.Sprite {
   private speed = 80
   private isFolowingPath = false
@@ -106,6 +107,5 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         }, index * interval)
       })
     })
-
   }
 }
