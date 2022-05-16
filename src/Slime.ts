@@ -1,12 +1,14 @@
+import { PathFindingGrid } from "./PathFindingGrid";
 import { Unit } from "./Unit";
 
 export class Slime extends Unit {
-  constructor(scene: Phaser.Scene, x: number, y: number) {
+  constructor(scene: Phaser.Scene, x: number, y: number, grid: PathFindingGrid) {
     super({
       scene,
       x,
       y,
       texture: 'slime',
+      grid,
       initalAnim: 'slime.idle',
       anims: [
         { key: 'slime.idle', config: { start: 0, end: 4 } },

@@ -5,12 +5,13 @@ export class Player extends Unit {
   private speed = 80
   private cursorsEnabled = true
 
-  constructor(scene: Phaser.Scene, x: number, y: number, private grid: PathFindingGrid) {
+  constructor(scene: Phaser.Scene, x: number, y: number, grid: PathFindingGrid) {
     super({
       scene,
       x,
       y,
       texture: 'hero',
+      grid,
       initalAnim: 'hero.idle',
       anims: [
         { key: 'hero.idle', config: { start: 0, end: 3 } },
@@ -65,29 +66,10 @@ export class Player extends Unit {
   private addClickListener() {
     this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
       const { worldX, worldY } = pointer
-      const { x: endX, y: endY } = this.grid.worldToTileXY(worldX, worldY)
-      const { x: startX, y: startY } = this.grid.worldToTileXY(this.x, this.y)
-
-      const path = this.grid.findPath(startX, startY, endX, endY)
-      const interval = 300
-
-      if (path.length <= 1) return
+      const { x: tileX, y: tileY } = this.grid.worldToTileXY(worldX, worldY)
 
       this.cursorsEnabled = false
-
-      path.slice(1).forEach(([x, y], index, { length }) => {
-        setTimeout(() => {
-          const worldX = this.grid.tileToWorldX(x) - this.body.offset.x
-          const worldY = this.grid.tileToWorldY(y) - this.body.offset.y
-
-          this.scene.physics.moveTo(this, worldX, worldY, undefined, interval)
-
-          if (index === length - 1) setTimeout(() => {
-            this.body.stop()
-            this.cursorsEnabled = true
-          }, interval)
-        }, index * interval)
-      })
+      this.moveTo(tileX, tileY, () => this.cursorsEnabled = true)
     })
   }
 }

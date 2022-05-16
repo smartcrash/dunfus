@@ -1,5 +1,6 @@
 import { applyMixins } from "./applyMixins"
 import { HasStats, IStats } from "./mixins/HasStats"
+import { PathFindingGrid } from "./PathFindingGrid"
 
 type AnimConfig = {
   key: string,
@@ -9,10 +10,13 @@ type AnimConfig = {
 export interface Unit extends Phaser.Physics.Arcade.Sprite, HasStats { }
 
 export class Unit extends Phaser.Physics.Arcade.Sprite {
+  protected grid: PathFindingGrid
+
   constructor(
-    { scene, x, y, texture, initalAnim, anims, frameRate = 8, stats }:
+    { scene, x, y, texture, grid, initalAnim, anims, frameRate = 8, stats }:
       {
         scene: Phaser.Scene,
+        grid: PathFindingGrid,
         x: number,
         y: number,
         texture: string,
@@ -23,6 +27,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
       }
   ) {
     super(scene, x, y, texture)
+
 
     this.createAnims(anims, frameRate)
     this.play(initalAnim)
@@ -38,6 +43,8 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 
     this.x -= this.body.offset.x
     this.y -= this.body.offset.y
+
+    this.grid = grid
 
     this.hp = stats.hp
     this.maxHp = stats.maxHp
@@ -56,6 +63,32 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
         repeat: -1,
       })
     )
+  }
+
+  public moveTo(tileX: number, tileY: number, onComplete: () => void = () => null): void {
+    const { x: startX, y: startY } = this.grid.worldToTileXY(this.x, this.y)
+
+    const path = this.grid.findPath(startX, startY, tileX, tileY)
+    const interval = 300
+
+    if (path.length <= 1) {
+      onComplete()
+      return
+    }
+
+    path.slice(1).forEach(([x, y], index, { length }) => {
+      setTimeout(() => {
+        const worldX = this.grid.tileToWorldX(x) - this.body.offset.x
+        const worldY = this.grid.tileToWorldY(y) - this.body.offset.y
+
+        this.scene.physics.moveTo(this, worldX, worldY, undefined, interval)
+
+        if (index === length - 1) setTimeout(() => {
+          this.body.stop()
+          onComplete()
+        }, interval)
+      }, index * interval)
+    })
   }
 }
 
