@@ -1,7 +1,6 @@
 import { type PathFindingGrid } from "./PathFindingGrid"
 import { Unit } from "./Unit"
 
-
 export class Player extends Unit {
   private speed = 80
   private cursorsEnabled = true
@@ -20,6 +19,7 @@ export class Player extends Unit {
         { key: 'hero.hit', config: { start: 24, end: 26 } },
         { key: 'hero.die', config: { start: 32, end: 39 } },
       ],
+      stats: { hp: 5, maxHp: 5 }
     })
 
     this.addCursorKeysListener()

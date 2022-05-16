@@ -1,11 +1,16 @@
+import { applyMixins } from "./applyMixins"
+import { HasStats, IStats } from "./mixins/HasStats"
+
 type AnimConfig = {
   key: string,
   config: Phaser.Types.Animations.GenerateFrameNumbers
 }
 
+export interface Unit extends Phaser.Physics.Arcade.Sprite, HasStats { }
+
 export class Unit extends Phaser.Physics.Arcade.Sprite {
   constructor(
-    { scene, x, y, texture, initalAnim, anims, frameRate = 8 }:
+    { scene, x, y, texture, initalAnim, anims, frameRate = 8, stats }:
       {
         scene: Phaser.Scene,
         x: number,
@@ -14,6 +19,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
         initalAnim: string,
         anims: AnimConfig[]
         frameRate?: number
+        stats: IStats,
       }
   ) {
     super(scene, x, y, texture)
@@ -32,6 +38,9 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 
     this.x -= this.body.offset.x
     this.y -= this.body.offset.y
+
+    this.hp = stats.hp
+    this.maxHp = stats.maxHp
   }
 
   private createAnims(anims: AnimConfig[], frameRate?: number): void {
@@ -49,3 +58,5 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     )
   }
 }
+
+applyMixins(Unit, [HasStats])
