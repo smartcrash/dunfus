@@ -1,4 +1,5 @@
 import { Scene } from 'phaser';
+import { Battle } from '../Battle';
 import { PathFindingGrid } from '../PathFindingGrid';
 import { Player } from '../Player';
 import { Slime } from '../Slime';
@@ -15,20 +16,22 @@ export class Room extends Scene {
 
     // Player
     const { x: iniX, y: iniY } = grid.tileToWorldXY(2, 2)
-    const player = new Player(this, iniX, iniY, grid)
+    const player = new Player(this, iniX, iniY)
 
-    // Camera
     const camera = this.cameras.main
 
     camera.zoom = 5
     camera.startFollow(player)
 
+
     // Colliders
     this.physics.add.collider(player, tilemap.getLayer(0).tilemapLayer)
 
     // Enemy
+    const slime = new Slime(this, grid.tileToWorldX(5), grid.tileToWorldY(5))
 
-    new Slime(this, grid.tileToWorldX(5), grid.tileToWorldY(5))
+    const battle = new Battle({ units: [player, slime] })
+    battle.start()
   }
 
   private createMap(): Phaser.Tilemaps.Tilemap {

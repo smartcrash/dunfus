@@ -1,6 +1,5 @@
 import { applyMixins } from "./applyMixins"
-import { Battle } from "./Battle"
-import { HasStats, IStats } from "./mixins/HasStats"
+import { HasStats } from "./mixins/HasStats"
 import { PathFindingGrid } from "./PathFindingGrid"
 
 type AnimConfig = {
@@ -11,27 +10,16 @@ type AnimConfig = {
 export interface Unit extends Phaser.Physics.Arcade.Sprite, HasStats { }
 
 export class Unit extends Phaser.Physics.Arcade.Sprite {
-  protected grid: PathFindingGrid
-
   constructor(
-    { scene, x, y, texture, grid, initalAnim, anims, frameRate = 8, stats }:
+    { scene, x, y, texture }:
       {
         scene: Phaser.Scene,
-        grid: PathFindingGrid,
         x: number,
         y: number,
         texture: string,
-        initalAnim: string,
-        anims: AnimConfig[]
-        frameRate?: number
-        stats: IStats,
       }
   ) {
     super(scene, x, y, texture)
-
-
-    this.createAnims(anims, frameRate)
-    this.play(initalAnim)
 
     scene.add.existing(this)
     scene.physics.add.existing(this)
@@ -42,14 +30,34 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     this.body.setSize(18, 12)
     this.body.setOffset(0, 8)
 
+    // TODO: Create `setPos` method
     this.x -= this.body.offset.x
     this.y -= this.body.offset.y
 
-    this.grid = grid
-    this.stats = stats
+    // Play animation based on body velocity
+
+    const playAnim = (key: string) => this.play(key, true)
+    const velocity = this.body.velocity
+    const textureKey = this.texture.key
+    let direccion: 'up' | 'down' | 'right' | 'left' = 'down'
+
+    const handleUpdate = () => {
+      if (velocity.x < 0) direccion = 'left'
+      else if (velocity.x > 0) direccion = 'right'
+      else if (velocity.y > 0) direccion = 'down'
+      else if (velocity.y < 0) direccion = 'up'
+
+      this.setFlipX(direccion === 'left')
+
+      if (velocity.length()) playAnim(`${textureKey}.walk`)
+      else playAnim(`${textureKey}.idle`)
+    }
+
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, handleUpdate)
+    this.scene.events.once(Phaser.Scenes.Events.DESTROY, () => this.scene.events.off(Phaser.Scenes.Events.UPDATE, handleUpdate))
   }
 
-  private createAnims(anims: AnimConfig[], frameRate?: number): void {
+  public createAnims(anims: AnimConfig[], frameRate = 8): void {
     const createAnim = this.scene.anims.create.bind(this.scene.anims)
     const generateFrameNumbers = this.scene.anims.generateFrameNumbers.bind(this.scene.anims)
     const textureKey = this.texture.key
@@ -64,10 +72,10 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     )
   }
 
-  public moveTo(tileX: number, tileY: number, onComplete: () => void = () => null): void {
-    const { x: startX, y: startY } = this.grid.worldToTileXY(this.x, this.y)
+  public moveTo(tileX: number, tileY: number, grid: PathFindingGrid, onComplete: () => void = () => null): void {
+    const { x: startX, y: startY } = grid.worldToTileXY(this.x, this.y)
 
-    const path = this.grid.findPath(startX, startY, tileX, tileY)
+    const path = grid.findPath(startX, startY, tileX, tileY)
     const interval = 300
 
     if (path.length <= 1) {
@@ -77,8 +85,8 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 
     path.slice(1).forEach(([x, y], index, { length }) => {
       setTimeout(() => {
-        const worldX = this.grid.tileToWorldX(x) - this.body.offset.x
-        const worldY = this.grid.tileToWorldY(y) - this.body.offset.y
+        const worldX = grid.tileToWorldX(x) - this.body.offset.x
+        const worldY = grid.tileToWorldY(y) - this.body.offset.y
 
         this.scene.physics.moveTo(this, worldX, worldY, undefined, interval)
 

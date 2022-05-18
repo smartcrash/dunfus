@@ -4,11 +4,16 @@ export interface IStats {
 }
 
 export class HasStats {
-  public stats: IStats
+  public stats!: IStats
+
   constructor(maxHp: number, hp: number = maxHp) {
-    this.stats = {
-      hp,
-      maxHp
-    }
+    this.setStats({
+      maxHp,
+      hp
+    })
+  }
+
+  public setStats(stats: IStats) {
+    this.stats = stats
   }
 }

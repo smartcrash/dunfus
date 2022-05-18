@@ -1,29 +1,30 @@
-import { type PathFindingGrid } from "./PathFindingGrid"
 import { Unit } from "./Unit"
 
 export class Player extends Unit {
   private speed = 80
   private cursorsEnabled = true
 
-  constructor(scene: Phaser.Scene, x: number, y: number, grid: PathFindingGrid) {
+  constructor(scene: Phaser.Scene, x: number, y: number) {
     super({
       scene,
       x,
       y,
       texture: 'hero',
-      grid,
-      initalAnim: 'hero.idle',
-      anims: [
-        { key: 'hero.idle', config: { start: 0, end: 3 } },
-        { key: 'hero.walk', config: { start: 8, end: 13 } },
-        { key: 'hero.attack', config: { start: 16, end: 19 } },
-        { key: 'hero.hit', config: { start: 24, end: 26 } },
-        { key: 'hero.die', config: { start: 32, end: 39 } },
-      ],
-      stats: { hp: 5, maxHp: 5 }
     })
 
-    this.addCursorKeysListener()
+    this.createAnims([
+      { key: 'hero.idle', config: { start: 0, end: 3 } },
+      { key: 'hero.walk', config: { start: 8, end: 13 } },
+      { key: 'hero.attack', config: { start: 16, end: 19 } },
+      { key: 'hero.hit', config: { start: 24, end: 26 } },
+      { key: 'hero.die', config: { start: 32, end: 39 } },
+    ])
+
+    this.setStats({
+      hp: 5,
+      maxHp: 5
+    })
+
     this.addClickListener()
   }
 
@@ -46,34 +47,15 @@ export class Player extends Unit {
       else if (cursors.up.isDown) this.setVelocityY(-speed)
       else if (cursors.down.isDown) this.setVelocityY(speed)
     })
-
-    // Play animation based on body velocity
-    // TODO: Move to Unit class
-
-    const playAnim = (key: string) => this.play(key, true)
-    const velocity = this.body.velocity
-    let direccion: 'up' | 'down' | 'right' | 'left' = 'down'
-
-    this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      if (velocity.x < 0) direccion = 'left'
-      else if (velocity.x > 0) direccion = 'right'
-      else if (velocity.y > 0) direccion = 'down'
-      else if (velocity.y < 0) direccion = 'up'
-
-      this.setFlipX(direccion === 'left')
-
-      if (velocity.length()) playAnim('hero.walk')
-      else playAnim('hero.idle')
-    })
   }
 
   private addClickListener() {
-    this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
-      const { worldX, worldY } = pointer
-      const { x: tileX, y: tileY } = this.grid.worldToTileXY(worldX, worldY)
+    // this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
+    //   const { worldX, worldY } = pointer
+    //   const { x: tileX, y: tileY } = this.grid.worldToTileXY(worldX, worldY)
 
-      this.cursorsEnabled = false
-      this.moveTo(tileX, tileY, () => this.cursorsEnabled = true)
-    })
+    //   this.cursorsEnabled = false
+    //   this.moveTo(tileX, tileY, () => this.cursorsEnabled = true)
+    // })
   }
 }
