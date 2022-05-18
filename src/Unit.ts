@@ -1,4 +1,5 @@
 import { applyMixins } from "./applyMixins"
+import { Battle } from "./Battle"
 import { HasStats, IStats } from "./mixins/HasStats"
 import { PathFindingGrid } from "./PathFindingGrid"
 
@@ -45,9 +46,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     this.y -= this.body.offset.y
 
     this.grid = grid
-
-    this.hp = stats.hp
-    this.maxHp = stats.maxHp
+    this.stats = stats
   }
 
   private createAnims(anims: AnimConfig[], frameRate?: number): void {
