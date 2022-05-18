@@ -27,6 +27,10 @@ export class Player extends Unit {
     this.addClickListener()
   }
 
+  /**
+   * Attach necesary cursor keys event listeners to allow
+   * arrow keys movement.
+   */
   private addCursorKeysListener() {
     const cursors = this.scene.input.keyboard.createCursorKeys()
     const speed = this.speed
