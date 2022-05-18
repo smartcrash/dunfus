@@ -1,5 +1,5 @@
-import { range } from "lodash-es"
-import { AStarFinder, Grid } from 'pathfinding';
+import { range } from 'lodash-es'
+import { AStarFinder, Grid } from 'pathfinding'
 
 const { max } = Math
 
@@ -13,7 +13,9 @@ export class PathFindingGrid {
     this.grid = new Grid(tilemap.width, tilemap.height)
     this.finder = new AStarFinder({ allowDiagonal: false, dontCrossCorners: true } as any)
 
-    tilemap.forEachTile(({ properties, x, y }) => this.grid.setWalkableAt(x, y, !properties.collides))
+    tilemap.forEachTile(({ properties, x, y }) =>
+      this.grid.setWalkableAt(x, y, !properties.collides)
+    )
   }
 
   /**
@@ -42,10 +44,7 @@ export class PathFindingGrid {
    * layers position, scale and scroll. This will return a new Vector2
    */
   worldToTileXY(worldX: number, worldY: number): Phaser.Math.Vector2 {
-    return new Phaser.Math.Vector2(
-      this.worldToTileX(worldX),
-      this.worldToTileY(worldY)
-    )
+    return new Phaser.Math.Vector2(this.worldToTileX(worldX), this.worldToTileY(worldY))
   }
 
   /**
@@ -66,10 +65,7 @@ export class PathFindingGrid {
    * Converts from tile XY coordinates (tile units) to world XY coordinates (pixels)
    */
   tileToWorldXY(tileX: number, tileY: number): Phaser.Math.Vector2 {
-    return new Phaser.Math.Vector2(
-      this.tileToWorldX(tileX),
-      this.tileToWorldY(tileY)
-    )
+    return new Phaser.Math.Vector2(this.tileToWorldX(tileX), this.tileToWorldY(tileY))
   }
 
   /**

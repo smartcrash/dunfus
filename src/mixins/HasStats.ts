@@ -9,7 +9,7 @@ export class HasStats {
   constructor(maxHp: number, hp: number = maxHp) {
     this.setStats({
       maxHp,
-      hp
+      hp,
     })
   }
 

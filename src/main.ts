@@ -1,6 +1,6 @@
 import './style.css'
 import Phaser, { Game } from 'phaser'
-import { Room } from './scenes/World'
+import { Room } from './scenes/Room'
 import { Preload } from './scenes/Preload'
 import { UI } from './scenes/UI'
 

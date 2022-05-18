@@ -1,4 +1,4 @@
-import { Unit } from "./Unit";
+import { Unit } from './Unit'
 
 export class Slime extends Unit {
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -19,7 +19,7 @@ export class Slime extends Unit {
 
     this.setStats({
       hp: 3,
-      maxHp: 3
+      maxHp: 3,
     })
   }
 }
