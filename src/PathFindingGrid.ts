@@ -76,6 +76,13 @@ export class PathFindingGrid {
   }
 
   /**
+   * Update availability of tile on XY coordinate
+   */
+  setWalkableAt(x: number, y: number, walkable: boolean): void {
+    this.grid.setWalkableAt(x, y, walkable)
+  }
+
+  /**
    * Returns an array of adjasent reachable tiles from tile XY coordinates
    */
   checkAdjacent(tileX: number, tileY: number, distance: number): number[][] {
