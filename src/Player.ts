@@ -22,6 +22,8 @@ export class Player extends Unit {
     this.setStats({
       hp: 5,
       maxHp: 5,
+      moves: 3,
+      maxMoves: 3
     })
   }
 
@@ -42,15 +44,5 @@ export class Player extends Unit {
       else if (cursors.up.isDown) this.setVelocityY(-speed)
       else if (cursors.down.isDown) this.setVelocityY(speed)
     })
-  }
-
-  private handlePointerDown(pointer: Phaser.Input.Pointer) {
-    // const { worldX, worldY } = pointer
-    // const { x: tileX, y: tileY } = grid.worldToTileXY(worldX, worldY)
-    // this.moveTo(tileX, tileY,)
-  }
-
-  public turn(): void {
-    this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, this.handlePointerDown)
   }
 }

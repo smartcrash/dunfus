@@ -20,6 +20,8 @@ export class Slime extends Unit {
     this.setStats({
       hp: 3,
       maxHp: 3,
+      moves: 5,
+      maxMoves: 5,
     })
   }
 }
