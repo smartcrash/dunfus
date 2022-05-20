@@ -2,7 +2,7 @@ import { applyMixins } from './applyMixins'
 import { HasStats } from './mixins/HasStats'
 import { PathFindingGrid } from './PathFindingGrid'
 
-export interface Unit extends Phaser.Physics.Arcade.Sprite, HasStats {}
+export interface Unit extends Phaser.Physics.Arcade.Sprite, HasStats { }
 
 export class Unit extends Phaser.Physics.Arcade.Sprite {
   constructor({
@@ -77,36 +77,35 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     )
   }
 
-  public moveTo(
+  public async moveTo(
     tileX: number,
     tileY: number,
     grid: PathFindingGrid,
-    onComplete: () => void = () => null
-  ): void {
-    const { x: startX, y: startY } = grid.worldToTileXY(this.x, this.y)
+  ): Promise<number[][]> {
+    return new Promise((resolve) => {
+      const { x: startX, y: startY } = grid.worldToTileXY(this.x, this.y)
 
-    const path = grid.findPath(startX, startY, tileX, tileY)
-    const interval = 300
+      const path = grid.findPath(startX, startY, tileX, tileY)
+      const interval = 300
 
-    if (path.length <= 1) {
-      onComplete()
-      return
-    }
+      if (path.length <= 1) return resolve(path)
 
-    path.slice(1).forEach(([x, y], index, { length }) => {
-      setTimeout(() => {
-        const worldX = grid.tileToWorldX(x) - this.body.offset.x
-        const worldY = grid.tileToWorldY(y) - this.body.offset.y
+      path.slice(1).forEach(([x, y], index, { length }) => {
+        setTimeout(() => {
+          const worldX = grid.tileToWorldX(x) - this.body.offset.x
+          const worldY = grid.tileToWorldY(y) - this.body.offset.y
 
-        this.scene.physics.moveTo(this, worldX, worldY, undefined, interval)
+          this.scene.physics.moveTo(this, worldX, worldY, undefined, interval)
 
-        if (index === length - 1) {
-          setTimeout(() => {
-            this.body.stop()
-            onComplete()
-          }, interval)
-        }
-      }, index * interval)
+          if (index === length - 1) {
+            setTimeout(() => {
+              this.body.stop()
+              resolve(path)
+            }, interval)
+          }
+        }, index * interval)
+      })
+
     })
   }
 }
