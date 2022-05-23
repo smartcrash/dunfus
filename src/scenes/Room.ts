@@ -1,4 +1,5 @@
 import { Scene } from 'phaser'
+import { Battle } from '../Batte'
 import { PathFindingGrid } from '../PathFindingGrid'
 import { Player } from '../Player'
 import { Slime } from '../Slime'
@@ -27,6 +28,8 @@ export class Room extends Scene {
 
     // Colliders
     this.physics.add.collider(player, tilemap.getLayer(0).tilemapLayer)
+
+    new Battle(this, grid, [player, slime])
   }
 
   private createMap(): Phaser.Tilemaps.Tilemap {

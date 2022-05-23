@@ -1,6 +1,6 @@
-import { Unit } from './Unit'
+import { PartyMember } from './PartyMember'
 
-export class Player extends Unit {
+export class Player extends PartyMember {
   private speed = 80
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -12,18 +12,25 @@ export class Player extends Unit {
     })
 
     this.createAnims([
-      { key: 'hero.idle', config: { start: 0, end: 3 } },
-      { key: 'hero.walk', config: { start: 8, end: 13 } },
+      { key: 'hero.idle', repeat: -1, config: { start: 0, end: 3 } },
+      { key: 'hero.walk', repeat: -1, config: { start: 8, end: 13 } },
       { key: 'hero.attack', config: { start: 16, end: 19 } },
       { key: 'hero.hit', config: { start: 24, end: 26 } },
       { key: 'hero.die', config: { start: 32, end: 39 } },
     ])
 
+    this.playAnim('idle')
+
     this.setStats({
       hp: 5,
       maxHp: 5,
       moves: 3,
-      maxMoves: 3
+      maxMoves: 3,
+      speed: 1,
+      strength: 2,
+      range: 1,
+      attacks: 1,
+      maxAttacks: 1,
     })
   }
 

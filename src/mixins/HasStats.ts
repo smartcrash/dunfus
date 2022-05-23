@@ -3,6 +3,11 @@ export interface IStats {
   maxHp: number
   moves: number,
   maxMoves: number
+  speed: number
+  strength: number,
+  range: number,
+  attacks: number
+  maxAttacks: number
 }
 
 export class HasStats {

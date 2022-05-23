@@ -20,7 +20,6 @@
   },
   "dependencies": {
     "@types/pathfinding": "^0.0.5",
-    "boardgame.io": "^0.49.12",
     "lodash-es": "^4.17.21",
     "pathfinding": "^0.4.18",
     "phaser": "^3.55.2"

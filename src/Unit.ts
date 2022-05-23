@@ -31,35 +31,14 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     this.x -= this.body.offset.x
     this.y -= this.body.offset.y
 
-    // Play animation based on body velocity
-
-    const playAnim = (key: string) => this.play(key, true)
-    const velocity = this.body.velocity
-    const textureKey = this.texture.key
-    let direccion: 'up' | 'down' | 'right' | 'left' = 'down'
-
-    const handleUpdate = () => {
-      if (velocity.x < 0) direccion = 'left'
-      else if (velocity.x > 0) direccion = 'right'
-      else if (velocity.y > 0) direccion = 'down'
-      else if (velocity.y < 0) direccion = 'up'
-
-      this.setFlipX(direccion === 'left')
-
-      if (velocity.length()) playAnim(`${textureKey}.walk`)
-      else playAnim(`${textureKey}.idle`)
-    }
-
-    this.scene.events.on(Phaser.Scenes.Events.UPDATE, handleUpdate)
-    this.scene.events.once(Phaser.Scenes.Events.DESTROY, () =>
-      this.scene.events.off(Phaser.Scenes.Events.UPDATE, handleUpdate)
-    )
+    this.setDepth(9)
   }
 
   public createAnims(
     anims: {
       key: string
       config: Phaser.Types.Animations.GenerateFrameNumbers
+      repeat?: number
     }[],
     frameRate = 8
   ): void {
@@ -67,16 +46,38 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     const generateFrameNumbers = this.scene.anims.generateFrameNumbers.bind(this.scene.anims)
     const textureKey = this.texture.key
 
-    anims.forEach(({ key, config }) =>
+    anims.forEach(({ key, repeat, config }) =>
       createAnim({
         key,
         frames: generateFrameNumbers(textureKey, config),
         frameRate,
-        repeat: -1,
+        repeat,
       })
     )
   }
 
+  /**
+   * Start playing given animation
+   */
+  public playAnim(key: string, ignoreIfPlaying?: boolean): void {
+    const textureKey = this.texture.key
+    this.play(`${textureKey}.${key}`, ignoreIfPlaying)
+  }
+
+  public hit(damage: number): void {
+    this.stats.hp -= damage
+
+    const textureKey = this.texture.key
+
+    this.play(`${textureKey}.hit`)
+    this.playAfterDelay(`${textureKey}.idle`, this.anims.duration)
+  }
+
+  /**
+   * Receive an tile XY coordinates along with a grid, find a path
+   * and move along path.
+   * Resolves when the unit reaches the destination.
+   */
   public async moveTo(
     tileX: number,
     tileY: number,
@@ -90,6 +91,11 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 
       if (path.length <= 1) return resolve(path)
 
+      grid.setWalkableAt(startX, startY, true)
+      grid.setWalkableAt(tileX, tileY, false)
+
+      this.playAnim(`walk`)
+
       path.slice(1).forEach(([x, y], index, { length }) => {
         setTimeout(() => {
           const worldX = grid.tileToWorldX(x) - this.body.offset.x
@@ -97,15 +103,19 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 
           this.scene.physics.moveTo(this, worldX, worldY, undefined, interval)
 
+          const { velocity } = this.body
+
+          this.setFlipX(velocity.x < 0)
+
           if (index === length - 1) {
             setTimeout(() => {
               this.body.stop()
+              this.playAnim(`idle`)
               resolve(path)
             }, interval)
           }
         }, index * interval)
       })
-
     })
   }
 }
