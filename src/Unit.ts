@@ -68,7 +68,8 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
    * Reduce HP and play hit animation
    */
   public hit(damage: number): void {
-    this.stats.hp -= damage
+    const oldValue = this.stats.hp
+    const value = (this.stats.hp -= damage)
 
     if (!this.stats.hp) return this.die()
 
@@ -76,6 +77,8 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 
     this.play(`${textureKey}.hit`)
     this.playAfterDelay(`${textureKey}.idle`, this.anims.duration)
+
+    this.emit(Unit.Events.HIT, value, oldValue)
   }
 
   /**  */
@@ -134,3 +137,9 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 }
 
 applyMixins(Unit, [HasStats])
+
+export namespace Unit {
+  export enum Events {
+    HIT = 'HIT'
+  }
+}

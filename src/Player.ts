@@ -1,4 +1,3 @@
-import { EVENTS, eventsCenter } from './EventsCenter'
 import { PartyMember } from './PartyMember'
 
 export class Player extends PartyMember {
@@ -33,16 +32,6 @@ export class Player extends PartyMember {
       attacks: 1,
       maxAttacks: 1,
     })
-  }
-
-  // TODO: Find another way to do this
-  // NOTE: use `this.emit` / `this.on`
-  public hit(damage: number): void {
-    const oldValue = this.stats.hp
-    super.hit(damage)
-    const value = this.stats.hp
-
-    eventsCenter.emit(EVENTS.onPlayerHealthChange, value, oldValue)
   }
 
   /**

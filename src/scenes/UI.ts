@@ -1,6 +1,5 @@
-import { Scene } from 'phaser'
-import { EVENTS, eventsCenter } from '../EventsCenter'
-import { HealthBar } from '../HealthBar'
+import { Scene } from 'phaser';
+import { HealthBar } from '../HealthBar';
 import { Unit } from '../Unit';
 
 export class UI extends Scene {
@@ -18,6 +17,6 @@ export class UI extends Scene {
     const { hp, maxHp } = this.player.stats
     const healthBar = new HealthBar(this, 100, 100, 300, 40, { defaultValue: hp, maxValue: maxHp })
 
-    eventsCenter.on(EVENTS.onPlayerHealthChange, (value: number) => healthBar.setValue(value))
+    this.player.on(Unit.Events.HIT, (value: number) => healthBar.setValue(value))
   }
 }
