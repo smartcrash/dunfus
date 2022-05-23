@@ -1,12 +1,11 @@
 import { isEqual, last } from 'lodash-es';
 import { Enemy } from './Enemy';
+import { isEnemy } from './helpers/isEnemy';
+import { isPartyMember } from './helpers/isPartyMember';
 import { PartyMember } from './PartyMember';
 import { PathFindingGrid } from './PathFindingGrid';
 import { TurnQueue } from './TurnQueue';
 import { Unit } from "./Unit";
-
-const isPartyMember = (o: Unit) => o instanceof PartyMember
-const isEnemy = (o: Unit) => o instanceof Enemy
 
 function closest<T extends Phaser.Types.Math.Vector2Like>(worldX: number, worldY: number, points: T[]): T {
   const point = new Phaser.Math.Vector2(worldX, worldY)
@@ -29,16 +28,13 @@ function includes(list: any[], needle: any): boolean {
 
 export class Battle {
   private turnQueue: TurnQueue
-  private partyMembers: PartyMember[]
-  private enemies: Enemy[]
+  public partyMembers: PartyMember[]
+  public enemies: Enemy[]
 
-  constructor(private scene: Phaser.Scene, private grid: PathFindingGrid, private units: Unit[]) {
+  constructor(private scene: Phaser.Scene, private grid: PathFindingGrid, public units: Unit[]) {
     this.turnQueue = new TurnQueue(this.units)
     this.partyMembers = units.filter(isPartyMember)
     this.enemies = units.filter(isEnemy)
-    this.start()
-
-    this.attachListeners()
   }
 
   private async turn() {
@@ -111,6 +107,7 @@ export class Battle {
   }
 
   public async start() {
+    this.attachListeners()
     this.turn()
   }
 

@@ -64,13 +64,26 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     this.play(`${textureKey}.${key}`, ignoreIfPlaying)
   }
 
+  /**
+   * Reduce HP and play hit animation
+   */
   public hit(damage: number): void {
     this.stats.hp -= damage
+
+    if (!this.stats.hp) return this.die()
 
     const textureKey = this.texture.key
 
     this.play(`${textureKey}.hit`)
     this.playAfterDelay(`${textureKey}.idle`, this.anims.duration)
+  }
+
+  /**  */
+  public die() {
+    const textureKey = this.texture.key
+
+    this.play(`${textureKey}.die`)
+    setTimeout(() => this.destroy(), this.anims.duration)
   }
 
   /**

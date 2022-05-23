@@ -10,7 +10,6 @@ export class Room extends Scene {
   }
 
   create(): void {
-    this.scene.run('ui')
 
     const tilemap = this.createMap()
     const grid = new PathFindingGrid(tilemap)
@@ -29,7 +28,13 @@ export class Room extends Scene {
     // Colliders
     this.physics.add.collider(player, tilemap.getLayer(0).tilemapLayer)
 
-    new Battle(this, grid, [player, slime])
+    // TODO: Create `createBattle` function
+
+    const battle = new Battle(this, grid, [player, slime])
+
+    this.scene.run('ui', { player })
+
+    battle.start()
   }
 
   private createMap(): Phaser.Tilemaps.Tilemap {
