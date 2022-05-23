@@ -9,6 +9,17 @@ export class Player extends PartyMember {
       x,
       y,
       texture: 'hero',
+      stats: {
+        hp: 3,
+        maxHp: 3,
+        moves: 3,
+        maxMoves: 3,
+        speed: 1,
+        strength: 2,
+        range: 1,
+        attacks: 1,
+        maxAttacks: 1,
+      }
     })
 
     this.createAnims([
@@ -20,18 +31,6 @@ export class Player extends PartyMember {
     ])
 
     this.playAnim('idle')
-
-    this.setStats({
-      hp: 3,
-      maxHp: 3,
-      moves: 3,
-      maxMoves: 3,
-      speed: 1,
-      strength: 2,
-      range: 1,
-      attacks: 1,
-      maxAttacks: 1,
-    })
   }
 
   /**

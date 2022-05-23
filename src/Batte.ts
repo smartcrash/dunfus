@@ -52,7 +52,10 @@ export class Battle {
     const { current } = this.turnQueue
     const { stats } = current
 
-    if (!stats.attacks && !stats.moves) {
+    const hasAttacks = !!stats.attacks
+    const hasMoves = !!stats.moves
+
+    if (!hasAttacks && !hasMoves) {
       this.endTurn()
       return
     }
@@ -67,11 +70,11 @@ export class Battle {
     const isAtRange = includes(this.grid.checkAdjacent(tileX, tileY, stats.range + 1), [targetX, targetY])
 
     if (isAtRange) {
-      if (!stats.attacks) return this.endTurn()
+      if (!hasAttacks) return this.endTurn()
 
       this.attack(target)
     } else {
-      if (!stats.moves) return this.endTurn()
+      if (!hasMoves) return this.endTurn()
 
       const path = this.grid.findPath(tileX, tileY, targetX, targetY)
 
@@ -117,8 +120,8 @@ export class Battle {
     const { stats } = current
 
     // Reset stats
-    stats.moves = stats.maxMoves
-    stats.attacks = stats.maxAttacks
+    stats.reset('moves')
+    stats.reset('attacks')
   }
 
 
@@ -140,7 +143,7 @@ export class Battle {
 
     if (isValid) {
       const { length } = await current.moveTo(tileX, tileY, this.grid)
-      stats.moves -= length - 1
+      stats.decrease('moves', length - 1)
     } else {
       console.log('INVALID_MOVE :>>', 'moveTo', { startX, startY, tileX, tileY })
     }
@@ -155,7 +158,7 @@ export class Battle {
     // TODO: Validate attack
 
     target.hit(stats.strength)
-    --stats.attacks
+    stats.decrease('attacks', 1)
 
     this.onMove()
   }

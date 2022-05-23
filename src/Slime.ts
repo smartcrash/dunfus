@@ -7,6 +7,17 @@ export class Slime extends Enemy {
       x,
       y,
       texture: 'slime',
+      stats: {
+        hp: 3,
+        maxHp: 3,
+        moves: 2,
+        maxMoves: 2,
+        speed: 2,
+        strength: 1,
+        range: 1,
+        attacks: 1,
+        maxAttacks: 1,
+      }
     })
 
     this.createAnims([
@@ -18,17 +29,5 @@ export class Slime extends Enemy {
     ])
 
     this.playAnim('idle')
-
-    this.setStats({
-      hp: 3,
-      maxHp: 3,
-      moves: 2,
-      maxMoves: 2,
-      speed: 2,
-      strength: 1,
-      range: 1,
-      attacks: 1,
-      maxAttacks: 1,
-    })
   }
 }

@@ -1,20 +1,21 @@
-import { applyMixins } from './applyMixins'
-import { HasStats } from './mixins/HasStats'
 import { PathFindingGrid } from './PathFindingGrid'
-
-export interface Unit extends Phaser.Physics.Arcade.Sprite, HasStats { }
+import { Stats, StatsManager } from './StatsManager'
 
 export class Unit extends Phaser.Physics.Arcade.Sprite {
+  public stats: StatsManager
+
   constructor({
     scene,
     x,
     y,
     texture,
+    stats,
   }: {
     scene: Phaser.Scene
     x: number
     y: number
     texture: string
+    stats: Stats
   }) {
     super(scene, x, y, texture)
 
@@ -30,6 +31,8 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     // TODO: Create `setPos` method
     this.x -= this.body.offset.x
     this.y -= this.body.offset.y
+
+    this.stats = new StatsManager(stats)
 
     this.setDepth(9)
   }
@@ -68,8 +71,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
    * Reduce HP and play hit animation
    */
   public hit(damage: number): void {
-    const oldValue = this.stats.hp
-    const value = (this.stats.hp -= damage)
+    this.stats.decrease('hp', damage)
 
     if (!this.stats.hp) return this.die()
 
@@ -77,8 +79,6 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 
     this.play(`${textureKey}.hit`)
     this.playAfterDelay(`${textureKey}.idle`, this.anims.duration)
-
-    this.emit(Unit.Events.HIT, value, oldValue)
   }
 
   /**  */
@@ -133,13 +133,5 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
         }, index * interval)
       })
     })
-  }
-}
-
-applyMixins(Unit, [HasStats])
-
-export namespace Unit {
-  export enum Events {
-    HIT = 'HIT'
   }
 }
