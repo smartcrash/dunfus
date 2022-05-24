@@ -10,8 +10,8 @@ export class Player extends PartyMember {
       y,
       texture: 'hero',
       stats: {
-        hp: 3,
-        maxHp: 3,
+        hp: 4,
+        maxHp: 4,
         moves: 3,
         maxMoves: 3,
         speed: 1,

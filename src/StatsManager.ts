@@ -14,7 +14,7 @@ export interface Stats {
   strength: number
 }
 
-export class StatsManager implements Stats {
+export class StatsManager extends Phaser.Events.EventEmitter implements Stats {
   public maxHp = 0
   public maxMoves = 0
   public maxAttacks = 0
@@ -26,15 +26,16 @@ export class StatsManager implements Stats {
   public attacks = 0
 
   constructor(defaultStats: Partial<Stats>) {
+    super()
     Object.assign(this, defaultStats)
   }
 
   increase(key: keyof Stats, amount: number): void {
-    this[key] += amount
+    this.set(key, this[key] + amount)
   }
 
   decrease(key: keyof Stats, amount: number): void {
-    this[key] = Math.max(this[key] - amount, 0)
+    this.set(key, Math.max(this[key] - amount, 0))
   }
 
   set(key: keyof Stats, value: number): void {
@@ -42,7 +43,12 @@ export class StatsManager implements Stats {
     const maxValue: number =
       limitKey in this ? (this[limitKey as keyof this] as any as number) : Infinity
 
-    this[key] = Math.min(value, maxValue)
+    const oldValue = this[key]
+    const newValue = Math.min(value, maxValue)
+
+    this[key] = newValue
+
+    this.emit('CHANGE', key, newValue, oldValue)
   }
 
   reset(key: 'hp' | 'moves' | 'attacks'): void {

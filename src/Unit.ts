@@ -47,19 +47,30 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
       maxValue: this.stats.maxHp,
     })
 
-    this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      this.healthBar.setX(this.x - this.width / 2 + 2).setY(this.y - this.height + 3)
+    // Follow unit's movement
+    const onUpdate = () => this.healthBar.setX(this.x - this.width / 2 + 2).setY(this.y - this.height + 3)
+
+    // Sync value with unit's HP
+    this.stats.on('CHANGE', (key: string, value: number) => { if (key === 'hp') this.healthBar.setValue(value) })
+
+    // Show on hover
+    this.healthBar.setAlpha(0)
+
+    const onPointerMove = (pointer: Phaser.Input.Pointer) => {
+      const { worldX, worldY } = pointer
+      if (this.getBounds().contains(worldX, worldY)) this.healthBar.setAlpha(1)
+      else this.healthBar.setAlpha(0)
+    }
+
+    // Attach listeners
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, onUpdate)
+    this.scene.input.on(Phaser.Input.Events.POINTER_MOVE, onPointerMove)
+
+    // Clean up events
+    this.once(Phaser.GameObjects.Events.REMOVED_FROM_SCENE, () => {
+      this.scene.events.off(Phaser.Scenes.Events.UPDATE, onUpdate)
+      this.scene.input.off(Phaser.Input.Events.POINTER_MOVE, onPointerMove)
     })
-
-    // TODO: Listen to stats.hp changes
-    // TODO: Listen to pos changes
-
-    // new Proxy(this, {
-    //   set(_, p, value) {
-    //     console.log(p, ':', value);
-    //     return true
-    //   },
-    // })
   }
 
   public createAnims(

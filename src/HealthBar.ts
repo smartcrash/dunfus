@@ -27,7 +27,7 @@ export class HealthBar {
     public width: number,
     public height: number,
     { defaultValue, maxValue }: { defaultValue: number; maxValue: number },
-    public styles = defaultStyles
+    public styles = defaultStyles,
   ) {
     this.maxValue = maxValue
     this.value = defaultValue
@@ -45,7 +45,7 @@ export class HealthBar {
     this.background = this.scene.add
       .rectangle(0, 0, this.width, this.height, Colors.black)
       .setStrokeStyle(borderWidth, Colors.white)
-      .setDepth(2)
+      .setDepth(3)
 
     // Compute the cell dimensions
     const cellWidth =
@@ -53,7 +53,7 @@ export class HealthBar {
     const cellHeight = this.height - borderWidth - padding * 2
 
     this.cells = times(this.maxValue, () =>
-      this.scene.add.rectangle(0, 0, cellWidth, cellHeight, Colors.white).setDepth(2)
+      this.scene.add.rectangle(0, 0, cellWidth, cellHeight, Colors.white).setDepth(3)
     )
   }
 
@@ -61,8 +61,8 @@ export class HealthBar {
     this.value = value
 
     this.cells.forEach((rect, index) => {
-      if (index < value) rect.setAlpha(1)
-      else rect.setAlpha(0)
+      if (index < value) rect.setVisible(true)
+      else rect.setVisible(false)
     })
 
     return this
@@ -89,6 +89,13 @@ export class HealthBar {
     this.y = y
     this.background.y = this.y
     this.cells.forEach((rect) => (rect.y = this.y))
+
+    return this
+  }
+
+  public setAlpha(value: number): this {
+    this.background.setAlpha(value)
+    this.cells.forEach(cell => cell.setAlpha(value))
 
     return this
   }
