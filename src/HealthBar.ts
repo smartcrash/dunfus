@@ -99,4 +99,9 @@ export class HealthBar {
 
     return this
   }
+
+  public destroy(fromScene?: boolean): void {
+    this.background.destroy(fromScene)
+    this.cells.forEach(cell => cell.destroy(fromScene))
+  }
 }

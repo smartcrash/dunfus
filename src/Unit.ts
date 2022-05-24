@@ -109,7 +109,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
   public hit(damage: number): void {
     this.stats.decrease('hp', damage)
 
-    if (!this.stats.hp) return this.die()
+    if (!this.stats.hp) return this.destroy()
 
     const textureKey = this.texture.key
 
@@ -118,11 +118,14 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
   }
 
   /**  */
-  public die() {
+  public destroy() {
     const textureKey = this.texture.key
 
     this.play(`${textureKey}.die`)
-    setTimeout(() => this.destroy(), this.anims.duration)
+    setTimeout(() => {
+      super.destroy()
+      this.healthBar.destroy()
+    }, this.anims.duration)
   }
 
   /**
