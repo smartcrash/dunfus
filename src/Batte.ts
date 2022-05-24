@@ -1,13 +1,17 @@
-import { isEqual, last } from 'lodash-es';
-import { Enemy } from './Enemy';
-import { isEnemy } from './helpers/isEnemy';
-import { isPartyMember } from './helpers/isPartyMember';
-import { PartyMember } from './PartyMember';
-import { PathFindingGrid } from './PathFindingGrid';
-import { TurnQueue } from './TurnQueue';
-import { Unit } from "./Unit";
+import { isEqual, last } from 'lodash-es'
+import { Enemy } from './Enemy'
+import { isEnemy } from './helpers/isEnemy'
+import { isPartyMember } from './helpers/isPartyMember'
+import { PartyMember } from './PartyMember'
+import { PathFindingGrid } from './PathFindingGrid'
+import { TurnQueue } from './TurnQueue'
+import { Unit } from './Unit'
 
-function closest<T extends Phaser.Types.Math.Vector2Like>(worldX: number, worldY: number, points: T[]): T {
+function closest<T extends Phaser.Types.Math.Vector2Like>(
+  worldX: number,
+  worldY: number,
+  points: T[]
+): T {
   const point = new Phaser.Math.Vector2(worldX, worldY)
   let i = -1
   let d = Infinity
@@ -23,7 +27,7 @@ function closest<T extends Phaser.Types.Math.Vector2Like>(worldX: number, worldY
 }
 
 function includes(list: any[], needle: any): boolean {
-  return list.some(item => isEqual(item, needle))
+  return list.some((item) => isEqual(item, needle))
 }
 
 export class Battle {
@@ -67,7 +71,10 @@ export class Battle {
 
     this.grid.setWalkableAt(targetX, targetY, true)
 
-    const isAtRange = includes(this.grid.checkAdjacent(tileX, tileY, stats.range + 1), [targetX, targetY])
+    const isAtRange = includes(this.grid.checkAdjacent(tileX, tileY, stats.range + 1), [
+      targetX,
+      targetY,
+    ])
 
     if (isAtRange) {
       if (!hasAttacks) return this.endTurn()
@@ -114,7 +121,6 @@ export class Battle {
     this.turn()
   }
 
-
   private async onBegin() {
     const { current } = this.turnQueue
     const { stats } = current
@@ -124,11 +130,9 @@ export class Battle {
     stats.reset('attacks')
   }
 
-
   private async onMove() {
     if (this.endIf()) this.endTurn()
   }
-
 
   //
   // Moves
@@ -139,7 +143,10 @@ export class Battle {
     const { current } = this.turnQueue
     const { stats } = current
     const { x: startX, y: startY } = this.grid.worldToTileXY(current.x, current.y)
-    const isValid = includes(this.grid.checkAdjacent(startX, startY, stats.moves + 1), [tileX, tileY])
+    const isValid = includes(this.grid.checkAdjacent(startX, startY, stats.moves + 1), [
+      tileX,
+      tileY,
+    ])
 
     if (isValid) {
       const { length } = await current.moveTo(tileX, tileY, this.grid)
@@ -177,24 +184,22 @@ export class Battle {
   }
 }
 
+// private draw(): void {
+//   const { current } = this.turnQueue
 
+//   if (isPartyMember(current)) {
+//     const { stats } = current
+//     const { x: tileX, y: tileY } = this.grid.worldToTileXY(current.x, current.y)
 
-  // private draw(): void {
-  //   const { current } = this.turnQueue
+//     const group = this.moves
+//     group.clear(true)
 
-  //   if (isPartyMember(current)) {
-  //     const { stats } = current
-  //     const { x: tileX, y: tileY } = this.grid.worldToTileXY(current.x, current.y)
+//     const tiles = this.grid.checkAdjacent(tileX, tileY, stats.moves + 1)
 
-  //     const group = this.moves
-  //     group.clear(true)
-
-  //     const tiles = this.grid.checkAdjacent(tileX, tileY, stats.moves + 1)
-
-  //     tiles.forEach(([x, y]) => {
-  //       const { x: worldX, y: worldY } = this.grid.tileToWorldXY(x, y)
-  //       const rect = this.scene.add.rectangle(worldX, worldY, 9, 9, 0xffffff)
-  //       group.add(rect)
-  //     })
-  //   }
-  // }
+//     tiles.forEach(([x, y]) => {
+//       const { x: worldX, y: worldY } = this.grid.tileToWorldXY(x, y)
+//       const rect = this.scene.add.rectangle(worldX, worldY, 9, 9, 0xffffff)
+//       group.add(rect)
+//     })
+//   }
+// }

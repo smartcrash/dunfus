@@ -2,7 +2,7 @@ import { times } from 'lodash-es'
 
 enum Colors {
   white = 0xffffff,
-  black = 0x000000
+  black = 0x000000,
 }
 
 const defaultStyles = {
@@ -12,45 +12,84 @@ const defaultStyles = {
 } as const
 
 export class HealthBar {
-  private maxValue: number
-  private hearths: Phaser.GameObjects.Rectangle[]
+  public value: number
+  public maxValue: number
+  public x = 0
+  public y = 0
+
+  private background!: Phaser.GameObjects.Rectangle
+  private cells!: Phaser.GameObjects.Rectangle[]
 
   constructor(
-    private scene: Phaser.Scene,
-    private x: number,
-    private y: number,
-    private width: number,
-    private height: number,
+    public scene: Phaser.Scene,
+    x: number,
+    y: number,
+    public width: number,
+    public height: number,
     { defaultValue, maxValue }: { defaultValue: number; maxValue: number },
-    { borderWidth, padding, spacing } = defaultStyles
+    public styles = defaultStyles
   ) {
     this.maxValue = maxValue
+    this.value = defaultValue
 
-    //
-    // Render
-    //
-    this.scene.add
-      .rectangle(this.x + this.width / 2, this.y, this.width, this.height, Colors.black)
-      .setStrokeStyle(borderWidth, Colors.white)
-
-    const cellWidth = (this.width - (padding * 2) - borderWidth - spacing * (this.maxValue - 1)) / this.maxValue
-    const cellHeight = this.height - borderWidth - (padding * 2)
-
-    this.hearths = times(maxValue, (index) => {
-      const rectX = this.x + cellWidth / 2 + padding + (spacing + cellWidth) * index
-      const rectY = this.y
-
-      return this.scene.add.rectangle(rectX, rectY, cellWidth, cellHeight, Colors.white)
-    })
-
-    // Set initial value
+    this.render()
     this.setValue(defaultValue)
+    this.setX(x)
+    this.setY(y)
   }
 
-  public setValue(value: number): void {
-    this.hearths.forEach((rect, index) => {
+  private render(): void {
+    const { borderWidth, padding, spacing } = this.styles
+
+    // Draw bordered container
+    this.background = this.scene.add
+      .rectangle(0, 0, this.width, this.height, Colors.black)
+      .setStrokeStyle(borderWidth, Colors.white)
+      .setDepth(2)
+
+    // Compute the cell dimensions
+    const cellWidth =
+      (this.width - padding * 2 - borderWidth - spacing * (this.maxValue - 1)) / this.maxValue
+    const cellHeight = this.height - borderWidth - padding * 2
+
+    this.cells = times(this.maxValue, () =>
+      this.scene.add.rectangle(0, 0, cellWidth, cellHeight, Colors.white).setDepth(2)
+    )
+  }
+
+  public setValue(value: number): this {
+    this.value = value
+
+    this.cells.forEach((rect, index) => {
       if (index < value) rect.setAlpha(1)
       else rect.setAlpha(0)
     })
+
+    return this
+  }
+
+  public setX(x: number): this {
+    this.x = x
+    this.background.x = this.x + this.width / 2
+
+    const { padding, spacing } = this.styles
+
+    this.cells.forEach((rect, index) => {
+      const cellWidth = rect.width
+      const stepX = spacing + cellWidth
+      const x = this.x + cellWidth / 2 + padding
+
+      rect.x = x + stepX * index
+    })
+
+    return this
+  }
+
+  public setY(y: number): this {
+    this.y = y
+    this.background.y = this.y
+    this.cells.forEach((rect) => (rect.y = this.y))
+
+    return this
   }
 }

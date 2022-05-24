@@ -1,4 +1,3 @@
-import { Unit } from "./Unit";
+import { Unit } from './Unit'
 
-export class Enemy extends Unit {
-}
+export class Enemy extends Unit {}

@@ -1,7 +1,9 @@
+import { HealthBar } from './HealthBar'
 import { PathFindingGrid } from './PathFindingGrid'
 import { Stats, StatsManager } from './StatsManager'
 
 export class Unit extends Phaser.Physics.Arcade.Sprite {
+  private healthBar!: HealthBar
   public stats: StatsManager
 
   constructor({
@@ -34,7 +36,30 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 
     this.stats = new StatsManager(stats)
 
-    this.setDepth(9)
+    this.setDepth(2)
+
+    this.attachHealthBar()
+  }
+
+  private attachHealthBar(): void {
+    this.healthBar = new HealthBar(this.scene, this.x, this.y, 15, 5, {
+      defaultValue: this.stats.hp,
+      maxValue: this.stats.maxHp,
+    })
+
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
+      this.healthBar.setX(this.x - this.width / 2 + 2).setY(this.y - this.height + 3)
+    })
+
+    // TODO: Listen to stats.hp changes
+    // TODO: Listen to pos changes
+
+    // new Proxy(this, {
+    //   set(_, p, value) {
+    //     console.log(p, ':', value);
+    //     return true
+    //   },
+    // })
   }
 
   public createAnims(
@@ -94,11 +119,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
    * and move along path.
    * Resolves when the unit reaches the destination.
    */
-  public async moveTo(
-    tileX: number,
-    tileY: number,
-    grid: PathFindingGrid,
-  ): Promise<number[][]> {
+  public async moveTo(tileX: number, tileY: number, grid: PathFindingGrid): Promise<number[][]> {
     return new Promise((resolve) => {
       const { x: startX, y: startY } = grid.worldToTileXY(this.x, this.y)
 

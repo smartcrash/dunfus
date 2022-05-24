@@ -19,7 +19,7 @@ export class Player extends PartyMember {
         range: 1,
         attacks: 1,
         maxAttacks: 1,
-      }
+      },
     })
 
     this.createAnims([

@@ -17,7 +17,7 @@ export class Slime extends Enemy {
         range: 1,
         attacks: 1,
         maxAttacks: 1,
-      }
+      },
     })
 
     this.createAnims([

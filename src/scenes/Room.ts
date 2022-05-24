@@ -10,7 +10,6 @@ export class Room extends Scene {
   }
 
   create(): void {
-
     const tilemap = this.createMap()
     const grid = new PathFindingGrid(tilemap)
 

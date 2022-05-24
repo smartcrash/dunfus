@@ -1,3 +1,3 @@
-import { Unit } from "./Unit";
+import { Unit } from './Unit'
 
-export class PartyMember extends Unit { }
+export class PartyMember extends Unit {}

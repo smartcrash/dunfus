@@ -1,4 +1,4 @@
-import { capitalize } from "lodash-es"
+import { capitalize } from 'lodash-es'
 
 export interface Stats {
   maxHp: number
@@ -6,12 +6,12 @@ export interface Stats {
   maxAttacks: number
 
   hp: number
-  moves: number,
-  range: number,
+  moves: number
+  range: number
   attacks: number
 
   speed: number
-  strength: number,
+  strength: number
 }
 
 export class StatsManager implements Stats {
@@ -25,24 +25,30 @@ export class StatsManager implements Stats {
   public range = 0
   public attacks = 0
 
-  constructor(defaultStats: Partial<Stats>) { Object.assign(this, defaultStats) }
+  constructor(defaultStats: Partial<Stats>) {
+    Object.assign(this, defaultStats)
+  }
 
-  increase(key: keyof Stats, amount: number): void { this[key] += amount }
+  increase(key: keyof Stats, amount: number): void {
+    this[key] += amount
+  }
 
-  decrease(key: keyof Stats, amount: number): void { this[key] = Math.max(this[key] - amount, 0) }
+  decrease(key: keyof Stats, amount: number): void {
+    this[key] = Math.max(this[key] - amount, 0)
+  }
 
   set(key: keyof Stats, value: number): void {
     const limitKey = `max${capitalize(key)}`
-    const maxValue: number = limitKey in this ? (this[limitKey as keyof this] as any) as number : Infinity
+    const maxValue: number =
+      limitKey in this ? (this[limitKey as keyof this] as any as number) : Infinity
 
     this[key] = Math.min(value, maxValue)
   }
 
   reset(key: 'hp' | 'moves' | 'attacks'): void {
     const limitKey = `max${capitalize(key)}`
-    const maxValue: number = limitKey in this ? (this[limitKey as keyof this] as any) as number : Infinity
+    const maxValue: number =
+      limitKey in this ? (this[limitKey as keyof this] as any as number) : Infinity
     this[key] = maxValue
   }
 }
-
-
