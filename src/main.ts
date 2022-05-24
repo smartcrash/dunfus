@@ -6,10 +6,14 @@ import { UI } from './scenes/UI'
 
 new Game({
   type: Phaser.AUTO,
-  width: window.innerWidth,
-  height: window.innerHeight,
   pixelArt: true,
-  render: { pixelArt: true },
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 256,
+    height: 192,
+    zoom: 4,
+  },
   physics: {
     default: 'arcade',
     arcade: {

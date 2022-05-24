@@ -22,7 +22,6 @@ export class Room extends Scene {
     // Camera
     const camera = this.cameras.main
 
-    camera.zoom = 5
     camera.startFollow(player)
 
     // Colliders
