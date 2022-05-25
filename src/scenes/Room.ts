@@ -33,6 +33,9 @@ export class Room extends Scene {
     // TODO: Create `createBattle` function
 
     const battle = new Battle(this, grid, [player, slime])
+
+    this.scene.run('ui', { grid, scene: this })
+
     battle.start()
   }
 
