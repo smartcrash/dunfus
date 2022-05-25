@@ -1,6 +1,7 @@
+import { Grid } from 'pathfinding'
 import { Scene } from 'phaser'
 import { Battle } from '../Batte'
-import { PathFindingGrid } from '../PathFindingGrid'
+import { Helpers } from '../Helpers'
 import { Player } from '../Player'
 import { Slime } from '../Slime'
 
@@ -11,12 +12,15 @@ export class Room extends Scene {
 
   create(): void {
     const tilemap = this.createMap()
-    const grid = new PathFindingGrid(tilemap)
+    const grid = new Grid(tilemap.width, tilemap.height)
+
+    tilemap.forEachTile(({ properties, x, y }) => grid.setWalkableAt(x, y, !properties.collides))
 
     // Player
-    const player = new Player(this, grid.tileToWorldX(2), grid.tileToWorldY(2))
+    const player = new Player(this, Helpers.tileToWorldX(2), Helpers.tileToWorldY(2))
+
     // Slime
-    const slime = new Slime(this, grid.tileToWorldX(5), grid.tileToWorldY(5))
+    const slime = new Slime(this, Helpers.tileToWorldX(5), Helpers.tileToWorldY(5))
 
     // Camera
     const camera = this.cameras.main
@@ -29,9 +33,6 @@ export class Room extends Scene {
     // TODO: Create `createBattle` function
 
     const battle = new Battle(this, grid, [player, slime])
-
-    this.scene.run('ui', { player })
-
     battle.start()
   }
 

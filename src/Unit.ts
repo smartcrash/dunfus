@@ -1,6 +1,10 @@
+import { range } from 'lodash-es'
+import { Grid } from 'pathfinding'
 import { HealthBar } from './HealthBar'
-import { PathFindingGrid } from './PathFindingGrid'
+import { Helpers } from './Helpers'
 import { Stats, StatsManager } from './StatsManager'
+
+const { max } = Math
 
 export class Unit extends Phaser.Physics.Arcade.Sprite {
   private healthBar!: HealthBar
@@ -28,7 +32,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     this.setBounce(0)
 
     this.body.setSize(18, 12)
-    this.body.setOffset(0, 8)
+    this.body.setOffset(0, 4)
 
     // TODO: Create `setPos` method
     this.x -= this.body.offset.x
@@ -105,6 +109,8 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 
   /**
    * Reduce HP and play hit animation
+   *
+   * TODO: Maybe remove
    */
   public hit(damage: number): void {
     this.stats.decrease('hp', damage)
@@ -117,7 +123,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     this.playAfterDelay(`${textureKey}.idle`, this.anims.duration)
   }
 
-  /**  */
+  /** Destroy this Unit removing it from scene  */
   public destroy() {
     const textureKey = this.texture.key
 
@@ -128,16 +134,68 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     }, this.anims.duration)
   }
 
+  get tileX() { return Helpers.worldToTileX(this.x) }
+
+  get tileY() { return Helpers.worldToTileY(this.y) }
+
+  /** Returns a list of tile XY coordinates that this unit can move to */
+  public getMovableTiles(grid: Grid): [number, number][] {
+    const { tileX, tileY } = this
+    const center = new Phaser.Math.Vector2(tileX, tileY)
+    const distance = this.stats.moves
+
+    const rows = range(max(1, tileX - distance), tileX + distance + 1)
+    const columns = range(max(1, tileY - distance), tileY + distance + 1)
+
+    const positions: [number, number][] = []
+
+    rows.forEach((x) =>
+      columns.forEach((y) => {
+        if (x === tileX && tileY === y) return
+        if (!grid.isWalkableAt(x, y)) return
+        if (center.distance({ x, y }) > distance) return
+        if (Helpers.findPath(tileX, tileY, x, y, grid).length - 1 > distance) return
+        positions.push([x, y])
+      })
+    )
+
+    return positions
+  }
+
+  /** Returns a list of tile XY coordinates that this unit can attack to */
+  public getAttackableTiles(grid: Grid): [number, number][] {
+    const { tileX, tileY } = this
+    const center = new Phaser.Math.Vector2(tileX, tileY)
+    const distance = this.stats.range
+
+    const rows = range(max(1, tileX - distance), tileX + distance + 1)
+    const columns = range(max(1, tileY - distance), tileY + distance + 1)
+
+    const positions: [number, number][] = []
+
+    rows.forEach((x) =>
+      columns.forEach((y) => {
+        if (x === tileX && tileY === y) return
+        if (!grid.isWalkableAt(x, y)) return
+        if (center.distance({ x, y }) > distance) return
+        if (Helpers.findPath(tileX, tileY, x, y, grid).length - 1 > distance) return
+        positions.push([x, y])
+      })
+    )
+
+    return positions
+  }
+
   /**
    * Receive an tile XY coordinates along with a grid, find a path
    * and move along path.
    * Resolves when the unit reaches the destination.
    */
-  public async moveTo(tileX: number, tileY: number, grid: PathFindingGrid): Promise<number[][]> {
+  public async moveTo(tileX: number, tileY: number, grid: Grid): Promise<number[][]> {
     return new Promise((resolve) => {
-      const { x: startX, y: startY } = grid.worldToTileXY(this.x, this.y)
+      const { x: startX, y: startY } = Helpers.worldToTileXY(this.x, this.y)
 
-      const path = grid.findPath(startX, startY, tileX, tileY)
+      const path = Helpers.findPath(startX, startY, tileX, tileY, grid)
       const interval = 300
 
       if (path.length <= 1) return resolve(path)
@@ -149,8 +207,8 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
 
       path.slice(1).forEach(([x, y], index, { length }) => {
         setTimeout(() => {
-          const worldX = grid.tileToWorldX(x) - this.body.offset.x
-          const worldY = grid.tileToWorldY(y) - this.body.offset.y
+          const worldX = Helpers.tileToWorldX(x) - this.body.offset.x
+          const worldY = Helpers.tileToWorldY(y) - this.body.offset.y
 
           this.scene.physics.moveTo(this, worldX, worldY, undefined, interval)
 

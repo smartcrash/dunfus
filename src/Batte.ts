@@ -1,9 +1,11 @@
 import { isEqual, last } from 'lodash-es'
+import { Grid } from 'pathfinding'
 import { Enemy } from './Enemy'
+import { EVENTS, eventsCenter } from './EventsCenter'
+import { Helpers } from './Helpers'
 import { isEnemy } from './helpers/isEnemy'
 import { isPartyMember } from './helpers/isPartyMember'
 import { PartyMember } from './PartyMember'
-import { PathFindingGrid } from './PathFindingGrid'
 import { TurnQueue } from './TurnQueue'
 import { Unit } from './Unit'
 
@@ -35,7 +37,7 @@ export class Battle {
   public partyMembers: PartyMember[]
   public enemies: Enemy[]
 
-  constructor(private scene: Phaser.Scene, private grid: PathFindingGrid, public units: Unit[]) {
+  constructor(private scene: Phaser.Scene, private grid: Grid, public units: Unit[]) {
     this.turnQueue = new TurnQueue(this.units)
     this.partyMembers = units.filter(isPartyMember)
     this.enemies = units.filter(isEnemy)
@@ -66,15 +68,12 @@ export class Battle {
 
     const target = closest(current.x, current.y, this.partyMembers)
 
-    const { x: tileX, y: tileY } = this.grid.worldToTileXY(current.x, current.y)
-    const { x: targetX, y: targetY } = this.grid.worldToTileXY(target.x, target.y)
+    const { x: tileX, y: tileY } = Helpers.worldToTileXY(current.x, current.y)
+    const { x: targetX, y: targetY } = Helpers.worldToTileXY(target.x, target.y)
 
     this.grid.setWalkableAt(targetX, targetY, true)
 
-    const isAtRange = includes(this.grid.checkAdjacent(tileX, tileY, stats.range + 1), [
-      targetX,
-      targetY,
-    ])
+    const isAtRange = includes(current.getAttackableTiles(this.grid), [targetX, targetY])
 
     if (isAtRange) {
       if (!hasAttacks) return this.endTurn()
@@ -83,7 +82,7 @@ export class Battle {
     } else {
       if (!hasMoves) return this.endTurn()
 
-      const path = this.grid.findPath(tileX, tileY, targetX, targetY)
+      const path = Helpers.findPath(tileX, tileY, targetX, targetY, this.grid)
 
       // Make sure that the last point is not occupied by the target,
       // if it is, remove it
@@ -91,7 +90,10 @@ export class Battle {
         path.pop()
       }
 
-      const [endX, endY] = path.slice(0, stats.moves + 1).pop()!
+      // The first element of the array always is the inital position
+      path.shift()
+
+      const [endX, endY] = last(path.slice(0, stats.moves))!
 
       await this.moveTo(endX, endY)
     }
@@ -114,6 +116,9 @@ export class Battle {
   private endTurn() {
     this.turnQueue.next()
     this.turn()
+
+    const { current } = this.turnQueue
+    eventsCenter.emit(EVENTS.TURN_END, { current })
   }
 
   public async start() {
@@ -128,6 +133,8 @@ export class Battle {
     // Reset stats
     stats.reset('moves')
     stats.reset('attacks')
+
+    eventsCenter.emit(EVENTS.TURN_START, { current })
   }
 
   private async onMove() {
@@ -142,11 +149,9 @@ export class Battle {
   private async moveTo(tileX: number, tileY: number) {
     const { current } = this.turnQueue
     const { stats } = current
-    const { x: startX, y: startY } = this.grid.worldToTileXY(current.x, current.y)
-    const isValid = includes(this.grid.checkAdjacent(startX, startY, stats.moves + 1), [
-      tileX,
-      tileY,
-    ])
+    const { x: startX, y: startY } = Helpers.worldToTileXY(current.x, current.y)
+
+    const isValid = includes(current.getMovableTiles(this.grid), [tileX, tileY])
 
     if (isValid) {
       const { length } = await current.moveTo(tileX, tileY, this.grid)
@@ -177,29 +182,9 @@ export class Battle {
 
       if (isPartyMemberTurn) {
         const { worldX, worldY } = pointer
-        const { x: tileX, y: tileY } = this.grid.worldToTileXY(worldX, worldY)
+        const { x: tileX, y: tileY } = Helpers.worldToTileXY(worldX, worldY)
         this.moveTo(tileX, tileY)
       }
     })
   }
 }
-
-// private draw(): void {
-//   const { current } = this.turnQueue
-
-//   if (isPartyMember(current)) {
-//     const { stats } = current
-//     const { x: tileX, y: tileY } = this.grid.worldToTileXY(current.x, current.y)
-
-//     const group = this.moves
-//     group.clear(true)
-
-//     const tiles = this.grid.checkAdjacent(tileX, tileY, stats.moves + 1)
-
-//     tiles.forEach(([x, y]) => {
-//       const { x: worldX, y: worldY } = this.grid.tileToWorldXY(x, y)
-//       const rect = this.scene.add.rectangle(worldX, worldY, 9, 9, 0xffffff)
-//       group.add(rect)
-//     })
-//   }
-// }
