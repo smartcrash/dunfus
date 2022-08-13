@@ -78,7 +78,7 @@ export class Battle {
     if (isAtRange) {
       if (!hasAttacks) return this.endTurn()
 
-      this.attack(target)
+      this.attack(targetX, targetY)
     } else {
       if (!hasMoves) return this.endTurn()
 
@@ -126,6 +126,21 @@ export class Battle {
     this.turn()
   }
 
+  private attachListeners() {
+    this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
+      const { current } = this.turnQueue
+      const isPartyMemberTurn = isPartyMember(current)
+
+      if (isPartyMemberTurn) {
+        const { worldX, worldY } = pointer
+        const { x: tileX, y: tileY } = Helpers.worldToTileXY(worldX, worldY)
+
+        if (this.isOcupied(tileX, tileY)) this.attack(tileX, tileY)
+        else this.moveTo(tileX, tileY)
+      }
+    })
+  }
+
   private async onBegin() {
     const { current } = this.turnQueue
     const { stats } = current
@@ -138,6 +153,8 @@ export class Battle {
   }
 
   private async onMove() {
+    eventsCenter.emit(EVENTS.MOVE_END)
+
     if (this.endIf()) this.endTurn()
   }
 
@@ -147,6 +164,7 @@ export class Battle {
 
   /** Move an unit to tile XY coordinates */
   private async moveTo(tileX: number, tileY: number) {
+
     const { current } = this.turnQueue
     const { stats } = current
     const { x: startX, y: startY } = Helpers.worldToTileXY(current.x, current.y)
@@ -154,6 +172,8 @@ export class Battle {
     const isValid = includes(current.getMovableTiles(this.grid), [tileX, tileY])
 
     if (isValid) {
+      eventsCenter.emit(EVENTS.MOVE_START, 'moveTo', tileX, tileY)
+
       const { length } = await current.moveTo(tileX, tileY, this.grid)
       stats.decrease('moves', length - 1)
     } else {
@@ -163,28 +183,30 @@ export class Battle {
     this.onMove()
   }
 
-  private attack(target: Unit) {
+  private attack(tileX: number, tileY: number) {
     const { current } = this.turnQueue
     const { stats } = current
 
-    // TODO: Validate attack
+    const target = this.unitAt(tileX, tileY)
+    const isValid = includes(current.getAttackableTiles(this.grid), [tileX, tileY]) && target && stats.attacks
 
-    target.hit(stats.strength)
-    stats.decrease('attacks', 1)
+    if (isValid) {
+      eventsCenter.emit(EVENTS.MOVE_START, 'attack', tileX, tileY)
+      target.hit(stats.strength)
+      stats.decrease('attacks', 1)
+    } else {
+      console.log('INVALID_MOVE :>>', 'attack', { tileX, tileY })
+    }
 
     this.onMove()
   }
 
-  private attachListeners() {
-    this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
-      const { current } = this.turnQueue
-      const isPartyMemberTurn = isPartyMember(current)
+  // Helpers
+  private unitAt(tileX: number, tileY: number): Unit | undefined {
+    return this.units.find((o) => o.tileX === tileX && o.tileY === tileY)
+  }
 
-      if (isPartyMemberTurn) {
-        const { worldX, worldY } = pointer
-        const { x: tileX, y: tileY } = Helpers.worldToTileXY(worldX, worldY)
-        this.moveTo(tileX, tileY)
-      }
-    })
+  private isOcupied(tileX: number, tileY: number): boolean {
+    return this.units.some((o) => o.tileX === tileX && o.tileY === tileY)
   }
 }

@@ -24,6 +24,7 @@ export class UI extends Scene {
   create(): void {
     eventsCenter.addListener(EVENTS.TURN_START, this.onTurnStart, this)
     eventsCenter.addListener(EVENTS.TURN_END, this.onTurnEnd, this)
+    // eventsCenter.addListener(EVENTS., this.onTurnEnd, this)
   }
 
   update(): void {
@@ -31,6 +32,7 @@ export class UI extends Scene {
 
     if (!current) return
 
+    // TODO: Move this logic to onMove event handler
     if (isPartyMember(current)) {
       const isMoving = !!current.body.velocity.length()
 
@@ -62,9 +64,11 @@ export class UI extends Scene {
   }
 
   private showAttackableTiles(unit: Unit): void {
-    for (const tile of unit.getAttackableTiles(this.grid)) {
-      const { x, y } = Helpers.tileToWorldXY(tile[0], tile[1])
-      this.addMarkerAt('attack', x, y)
+    if (unit.stats.attacks) {
+      for (const tile of unit.getAttackableTiles(this.grid)) {
+        const { x, y } = Helpers.tileToWorldXY(tile[0], tile[1])
+        this.addMarkerAt('attack', x, y)
+      }
     }
   }
 

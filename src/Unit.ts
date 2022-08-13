@@ -176,7 +176,7 @@ export class Unit extends Phaser.Physics.Arcade.Sprite {
     rows.forEach((x) =>
       columns.forEach((y) => {
         if (x === tileX && tileY === y) return
-        if (!grid.isWalkableAt(x, y)) return
+        // if (!grid.isWalkableAt(x, y)) return
         if (center.distance({ x, y }) > distance) return
         if (Helpers.findPath(tileX, tileY, x, y, grid).length - 1 > distance) return
         positions.push([x, y])
